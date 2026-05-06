@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sales-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sales_management}
+      POSTGRES_USER: ${POSTGRES_USER:-sales_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sales_user} -d ${POSTGRES_DB:-sales_management}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sales-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-sales_management}
+      DB_USERNAME: ${POSTGRES_USER:-sales_user}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+      JWT_SECRET: ${JWT_SECRET:-sales-management-demo-secret-key-please-change-in-production}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      APP_UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+    container_name: sales-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-80}:80"
+
+volumes:
+  postgres_data:
+  uploads_data:

@@ -1,0 +1,18 @@
+import api from './api';
+
+interface UploadResponse {
+  url: string;
+}
+
+export async function uploadImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await api.post<UploadResponse>('/uploads/images', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  return response.data.url.startsWith('http')
+    ? response.data.url
+    : `http://localhost:8080${response.data.url}`;
+}

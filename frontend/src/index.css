@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #172026;
+  background: #f6f7f9;
+  --brand-red: #d71920;
+  --ink: #172026;
+  font-family:
+    "Be Vietnam Pro", "Segoe UI", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    sans-serif;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes chat-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes chat-pulse {
+  0%,
+  100% {
+    box-shadow: 0 14px 30px rgb(215 25 32 / 0.32);
+  }
+  50% {
+    box-shadow: 0 18px 42px rgb(215 25 32 / 0.52);
+  }
+}
+
+@keyframes border-scan {
+  0% {
+    border-color: rgb(226 232 240);
+  }
+  50% {
+    border-color: rgb(215 25 32 / 0.55);
+  }
+  100% {
+    border-color: rgb(226 232 240);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.48s ease both;
+}
+
+.animate-chat-pop {
+  animation: chat-pop 0.22s ease both;
+}
+
+.animate-chat-pulse {
+  animation: chat-pulse 2.2s ease-in-out infinite;
+}
+
+.animate-border-scan {
+  animation: border-scan 2.6s ease-in-out infinite;
+}
+
+.stagger-card {
+  animation: fade-up 0.42s ease both;
+}
+
+.stagger-card:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.stagger-card:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.stagger-card:nth-child(4) {
+  animation-delay: 210ms;
+}

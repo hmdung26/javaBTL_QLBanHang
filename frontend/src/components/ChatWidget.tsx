@@ -14,7 +14,7 @@ function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
-      content: 'Xin chao, toi co the tu van cau hinh PC, san pham va quy trinh dat hang cho ban.',
+      content: 'Xin chào, tôi có thể tư vấn cấu hình, bảo hành chính hãng, sản phẩm và quy trình đặt hàng cho bạn.',
     },
   ]);
 
@@ -53,7 +53,7 @@ function ChatWidget() {
           <div className="flex items-center justify-between bg-slate-950 px-4 py-3 text-white">
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-yellow-300" />
-              <span className="font-black uppercase">AI tu van</span>
+              <span className="font-black uppercase">AI Tư Vấn</span>
             </div>
             <button type="button" onClick={() => setIsOpen(false)} className="rounded p-1 hover:bg-white/10">
               <X className="h-4 w-4" />

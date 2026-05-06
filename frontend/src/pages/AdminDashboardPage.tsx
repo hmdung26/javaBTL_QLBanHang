@@ -956,24 +956,24 @@ function ProductForm({
         </h2>
       </div>
 
-            <AdminInput
-        label="T�n s?n ph?m"
+      <AdminInput
+        label="Tên sản phẩm"
         value={productForm.name}
         required
         onChange={(value) => setProductForm({ ...productForm, name: value })}
       />
-            <RichTextEditor
-        label="B�i vi?t m� t? s?n ph?m"
+      <RichTextEditor
+        label="Bài viết mô tả sản phẩm"
         value={productForm.description}
         onChange={(value) => setProductForm({ ...productForm, description: value })}
       />
       <RichTextEditor
-        label="Th�ng s? k? thu?t"
+        label="Thông số kỹ thuật"
         value={productForm.specifications}
         onChange={(value) => setProductForm({ ...productForm, specifications: value })}
       />
       <AdminInput
-        label="Th?i gian b?o h�nh"
+        label="Thời gian bảo hành"
         value={productForm.warrantyPeriod}
         onChange={(value) => setProductForm({ ...productForm, warrantyPeriod: value })}
       />

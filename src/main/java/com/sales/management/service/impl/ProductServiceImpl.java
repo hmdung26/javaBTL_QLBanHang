@@ -29,6 +29,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = Product.builder()
                 .name(requestDTO.getName())
                 .description(requestDTO.getDescription())
+                .specifications(requestDTO.getSpecifications())
                 .price(requestDTO.getPrice())
                 .stockQuantity(requestDTO.getStockQuantity())
                 .imageUrl(requestDTO.getImageUrl())
@@ -83,6 +84,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = findProductById(id);
         product.setName(requestDTO.getName());
         product.setDescription(requestDTO.getDescription());
+        product.setSpecifications(requestDTO.getSpecifications());
         product.setPrice(requestDTO.getPrice());
         product.setStockQuantity(requestDTO.getStockQuantity());
         product.setImageUrl(requestDTO.getImageUrl());
@@ -147,6 +149,7 @@ public class ProductServiceImpl implements ProductService {
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
+                .specifications(product.getSpecifications())
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .imageUrl(product.getImageUrl())

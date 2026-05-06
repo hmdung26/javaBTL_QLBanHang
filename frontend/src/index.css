@@ -98,3 +98,53 @@ a {
 .stagger-card:nth-child(4) {
   animation-delay: 210ms;
 }
+
+.product-rich-content h2,
+.product-rich-content h3,
+[contenteditable] h2,
+[contenteditable] h3 {
+  margin: 14px 0 8px;
+  font-weight: 900;
+  color: #0f172a;
+  text-transform: uppercase;
+}
+
+.product-rich-content p,
+[contenteditable] p {
+  margin: 8px 0;
+}
+
+.product-rich-content ul,
+.product-rich-content ol,
+[contenteditable] ul,
+[contenteditable] ol {
+  margin: 8px 0 8px 22px;
+}
+
+.product-rich-content ul,
+[contenteditable] ul {
+  list-style: disc;
+}
+
+.product-rich-content ol,
+[contenteditable] ol {
+  list-style: decimal;
+}
+
+.product-rich-content img,
+[contenteditable] img {
+  margin: 12px 0;
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+.product-rich-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-rich-content td,
+.product-rich-content th {
+  border: 1px solid #e2e8f0;
+  padding: 10px;
+}

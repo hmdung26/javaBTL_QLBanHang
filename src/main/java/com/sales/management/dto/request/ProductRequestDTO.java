@@ -1,8 +1,10 @@
 package com.sales.management.dto.request;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,19 +20,26 @@ import lombok.Setter;
 public class ProductRequestDTO {
 
     @NotBlank(message = "Product name is required")
+    @Size(max = 255, message = "Product name must not exceed 255 characters")
     private String name;
 
+    @Size(max = 50000, message = "Product description must not exceed 50000 characters")
     private String description;
 
+    @Size(max = 50000, message = "Product specifications must not exceed 50000 characters")
+    private String specifications;
+
     @NotNull(message = "Product price is required")
-    @Min(value = 0, message = "Product price must be at least 0")
+    @DecimalMin(value = "0.0", message = "Product price must be at least 0")
     private BigDecimal price;
 
     @Min(value = 0, message = "Stock quantity must be at least 0")
     private int stockQuantity;
 
+    @Size(max = 1000, message = "Product image URL must not exceed 1000 characters")
     private String imageUrl;
 
+    @Size(max = 100, message = "Warranty period must not exceed 100 characters")
     private String warrantyPeriod;
 
     private Long categoryId;

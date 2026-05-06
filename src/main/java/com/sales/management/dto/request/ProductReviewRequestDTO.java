@@ -2,6 +2,7 @@ package com.sales.management.dto.request;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,5 +20,6 @@ public class ProductReviewRequestDTO {
     @Max(value = 5, message = "Rating must be at most 5")
     private int rating;
 
+    @Size(max = 1000, message = "Review comment must not exceed 1000 characters")
     private String comment;
 }

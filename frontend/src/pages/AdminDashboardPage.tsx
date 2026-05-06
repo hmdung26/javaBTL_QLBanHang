@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+﻿import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   BarChart3,
@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import MonthlyRevenueChart from '../components/MonthlyRevenueChart';
+import RichTextEditor from '../components/RichTextEditor';
 import { fetchAdminUsers, fetchDashboardStats, fetchMonthlyRevenue } from '../services/AdminService';
 import { generateAdminReport } from '../services/AiService';
 import {
@@ -56,6 +57,7 @@ type AdminTab = 'overview' | 'products' | 'categories' | 'banners' | 'orders' | 
 const emptyProductForm: ProductRequest = {
   name: '',
   description: '',
+  specifications: '',
   price: 0,
   stockQuantity: 0,
   imageUrl: '',
@@ -160,7 +162,7 @@ function AdminDashboardPage() {
         return `${latestMonth.year}-${String(latestMonth.month).padStart(2, '0')}`;
       });
     } catch {
-      toast.error('Không tải được dữ liệu quản trị. Vui lòng đăng nhập tài khoản admin.');
+      toast.error('KhÃ´ng táº£i Ä‘Æ°á»£c dá»¯ liá»‡u quáº£n trá»‹. Vui lÃ²ng Ä‘Äƒng nháº­p tÃ i khoáº£n admin.');
     } finally {
       setIsLoading(false);
     }
@@ -172,17 +174,17 @@ function AdminDashboardPage() {
     try {
       if (editingProductId) {
         await updateProduct(editingProductId, productForm);
-        toast.success('Đã cập nhật sản phẩm');
+        toast.success('ÄÃ£ cáº­p nháº­t sáº£n pháº©m');
       } else {
         await createProduct(productForm);
-        toast.success('Đã thêm sản phẩm');
+        toast.success('ÄÃ£ thÃªm sáº£n pháº©m');
       }
 
       setProductForm(emptyProductForm);
       setEditingProductId(null);
       await loadDashboard();
     } catch {
-      toast.error('Không lưu được sản phẩm');
+      toast.error('KhÃ´ng lÆ°u Ä‘Æ°á»£c sáº£n pháº©m');
     }
   }
 
@@ -191,6 +193,7 @@ function AdminDashboardPage() {
     setProductForm({
       name: product.name,
       description: product.description ?? '',
+      specifications: product.specifications ?? '',
       price: product.price,
       stockQuantity: product.stockQuantity,
       imageUrl: product.imageUrl ?? '',
@@ -201,16 +204,16 @@ function AdminDashboardPage() {
   }
 
   async function handleDeleteProduct(id: number) {
-    if (!window.confirm('Xóa sản phẩm này?')) {
+    if (!window.confirm('XÃ³a sáº£n pháº©m nÃ y?')) {
       return;
     }
 
     try {
       await deleteProduct(id);
-      toast.success('Đã xóa sản phẩm');
+      toast.success('ÄÃ£ xÃ³a sáº£n pháº©m');
       await loadDashboard();
     } catch {
-      toast.error('Không xóa được sản phẩm');
+      toast.error('KhÃ´ng xÃ³a Ä‘Æ°á»£c sáº£n pháº©m');
     }
   }
 
@@ -220,17 +223,17 @@ function AdminDashboardPage() {
     try {
       if (editingCategoryId) {
         await updateCategory(editingCategoryId, categoryForm);
-        toast.success('Đã cập nhật danh mục');
+        toast.success('ÄÃ£ cáº­p nháº­t danh má»¥c');
       } else {
         await createCategory(categoryForm);
-        toast.success('Đã thêm danh mục');
+        toast.success('ÄÃ£ thÃªm danh má»¥c');
       }
 
       setCategoryForm(emptyCategoryForm);
       setEditingCategoryId(null);
       await loadDashboard();
     } catch {
-      toast.error('Không lưu được danh mục');
+      toast.error('KhÃ´ng lÆ°u Ä‘Æ°á»£c danh má»¥c');
     }
   }
 
@@ -244,16 +247,16 @@ function AdminDashboardPage() {
   }
 
   async function handleDeleteCategory(id: number) {
-    if (!window.confirm('Xóa danh mục này?')) {
+    if (!window.confirm('XÃ³a danh má»¥c nÃ y?')) {
       return;
     }
 
     try {
       await deleteCategory(id);
-      toast.success('Đã xóa danh mục');
+      toast.success('ÄÃ£ xÃ³a danh má»¥c');
       await loadDashboard();
     } catch {
-      toast.error('Không xóa được danh mục');
+      toast.error('KhÃ´ng xÃ³a Ä‘Æ°á»£c danh má»¥c');
     }
   }
 
@@ -263,17 +266,17 @@ function AdminDashboardPage() {
     try {
       if (editingBannerId) {
         await updateBanner(editingBannerId, bannerForm);
-        toast.success('Đã cập nhật banner');
+        toast.success('ÄÃ£ cáº­p nháº­t banner');
       } else {
         await createBanner(bannerForm);
-        toast.success('Đã thêm banner');
+        toast.success('ÄÃ£ thÃªm banner');
       }
 
       setBannerForm(emptyBannerForm);
       setEditingBannerId(null);
       await loadDashboard();
     } catch {
-      toast.error('Không lưu được banner');
+      toast.error('KhÃ´ng lÆ°u Ä‘Æ°á»£c banner');
     }
   }
 
@@ -291,26 +294,26 @@ function AdminDashboardPage() {
   }
 
   async function handleDeleteBanner(id: number) {
-    if (!window.confirm('Xóa banner này?')) {
+    if (!window.confirm('XÃ³a banner nÃ y?')) {
       return;
     }
 
     try {
       await deleteBanner(id);
-      toast.success('Đã xóa banner');
+      toast.success('ÄÃ£ xÃ³a banner');
       await loadDashboard();
     } catch {
-      toast.error('Không xóa được banner');
+      toast.error('KhÃ´ng xÃ³a Ä‘Æ°á»£c banner');
     }
   }
 
   async function handleOrderStatusChange(id: number, status: OrderStatus) {
     try {
       await updateOrderStatus(id, status);
-      toast.success('Đã cập nhật trạng thái đơn hàng');
+      toast.success('ÄÃ£ cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng');
       await loadDashboard();
     } catch {
-      toast.error('Không cập nhật được trạng thái đơn hàng');
+      toast.error('KhÃ´ng cáº­p nháº­t Ä‘Æ°á»£c tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng');
     }
   }
 
@@ -321,7 +324,7 @@ function AdminDashboardPage() {
       const response = await generateAdminReport();
       setAiReport(response.answer);
     } catch {
-      toast.error('Không tạo được báo cáo AI. Kiểm tra GEMINI_API_KEY trên backend.');
+      toast.error('KhÃ´ng táº¡o Ä‘Æ°á»£c bÃ¡o cÃ¡o AI. Kiá»ƒm tra GEMINI_API_KEY trÃªn backend.');
     } finally {
       setIsGeneratingReport(false);
     }
@@ -332,10 +335,10 @@ function AdminDashboardPage() {
       <div className="rounded-md bg-slate-950 p-5 text-white">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-bold uppercase text-red-300">Trang quản trị</p>
-            <h1 className="text-2xl font-black uppercase">Điều hành cửa hàng</h1>
+            <p className="text-sm font-bold uppercase text-red-300">Trang quáº£n trá»‹</p>
+            <h1 className="text-2xl font-black uppercase">Äiá»u hÃ nh cá»­a hÃ ng</h1>
             <p className="text-sm text-slate-300">
-              Quản lý sản phẩm, danh mục, tồn kho và đơn hàng ở một nơi.
+              Quáº£n lÃ½ sáº£n pháº©m, danh má»¥c, tá»“n kho vÃ  Ä‘Æ¡n hÃ ng á»Ÿ má»™t nÆ¡i.
             </p>
           </div>
           <button
@@ -343,19 +346,19 @@ function AdminDashboardPage() {
             onClick={loadDashboard}
             className="rounded bg-[#d71920] px-4 py-2 text-sm font-black uppercase text-white hover:bg-[#b91319]"
           >
-            Làm mới dữ liệu
+            LÃ m má»›i dá»¯ liá»‡u
           </button>
         </div>
       </div>
 
       {false && <div className="flex gap-2 overflow-x-auto">
         {[
-          { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
-          { id: 'products', label: 'Sản phẩm', icon: Boxes },
-          { id: 'categories', label: 'Danh mục', icon: FolderTree },
+          { id: 'overview', label: 'Tá»•ng quan', icon: LayoutDashboard },
+          { id: 'products', label: 'Sáº£n pháº©m', icon: Boxes },
+          { id: 'categories', label: 'Danh má»¥c', icon: FolderTree },
           { id: 'banners', label: 'Banner', icon: Image },
-          { id: 'users', label: 'Người dùng', icon: UserRound },
-          { id: 'orders', label: 'Đơn hàng', icon: ReceiptText },
+          { id: 'users', label: 'NgÆ°á»i dÃ¹ng', icon: UserRound },
+          { id: 'orders', label: 'ÄÆ¡n hÃ ng', icon: ReceiptText },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -376,18 +379,18 @@ function AdminDashboardPage() {
 
       {isLoading && (
         <div className="rounded-md border border-slate-200 bg-white p-8 text-center text-slate-600">
-          Đang tải dữ liệu quản trị...
+          Äang táº£i dá»¯ liá»‡u quáº£n trá»‹...
         </div>
       )}
 
       {!isLoading && activeTab === 'overview' && (
         <div className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <StatCard label="Sản phẩm" value={stats?.totalProducts ?? 0} />
-            <StatCard label="Danh mục" value={stats?.totalCategories ?? 0} />
-            <StatCard label="Đơn hàng" value={stats?.totalOrders ?? 0} />
-            <StatCard label="Đơn chờ xử lý" value={stats?.pendingOrders ?? 0} />
-            <StatCard label="Sắp hết hàng" value={stats?.lowStockProducts ?? 0} />
+            <StatCard label="Sáº£n pháº©m" value={stats?.totalProducts ?? 0} />
+            <StatCard label="Danh má»¥c" value={stats?.totalCategories ?? 0} />
+            <StatCard label="ÄÆ¡n hÃ ng" value={stats?.totalOrders ?? 0} />
+            <StatCard label="ÄÆ¡n chá» xá»­ lÃ½" value={stats?.pendingOrders ?? 0} />
+            <StatCard label="Sáº¯p háº¿t hÃ ng" value={stats?.lowStockProducts ?? 0} />
             <StatCard
               label="Doanh thu"
               value={currencyFormatter.format(stats?.totalRevenue ?? 0)}
@@ -407,9 +410,9 @@ function AdminDashboardPage() {
               <div>
                 <h2 className="flex items-center gap-2 font-black uppercase text-slate-950">
                   <BrainCircuit className="h-5 w-5 text-[#d71920]" />
-                  Báo cáo AI
+                  BÃ¡o cÃ¡o AI
                 </h2>
-                <p className="text-sm text-slate-500">Gemini 2.5 Flash phân tích nhanh tình hình bán hàng.</p>
+                <p className="text-sm text-slate-500">Gemini 2.5 Flash phÃ¢n tÃ­ch nhanh tÃ¬nh hÃ¬nh bÃ¡n hÃ ng.</p>
               </div>
               <button
                 type="button"
@@ -417,34 +420,34 @@ function AdminDashboardPage() {
                 disabled={isGeneratingReport}
                 className="rounded bg-[#d71920] px-4 py-2 text-sm font-black uppercase text-white disabled:bg-slate-300"
               >
-                {isGeneratingReport ? 'Đang phân tích...' : 'Tạo báo cáo AI'}
+                {isGeneratingReport ? 'Äang phÃ¢n tÃ­ch...' : 'Táº¡o bÃ¡o cÃ¡o AI'}
               </button>
             </div>
             <div className="whitespace-pre-line p-4 text-sm leading-7 text-slate-700">
-              {aiReport || 'Chưa có báo cáo. Bấm "Tạo báo cáo AI" để xem nhận định và đề xuất vận hành.'}
+              {aiReport || 'ChÆ°a cÃ³ bÃ¡o cÃ¡o. Báº¥m "Táº¡o bÃ¡o cÃ¡o AI" Ä‘á»ƒ xem nháº­n Ä‘á»‹nh vÃ  Ä‘á» xuáº¥t váº­n hÃ nh.'}
             </div>
           </div>
 
           <div className="rounded-md border border-slate-200 bg-white">
             <div className="border-b border-slate-200 px-4 py-3">
-              <h2 className="font-black uppercase text-slate-950">Cần chú ý</h2>
+              <h2 className="font-black uppercase text-slate-950">Cáº§n chÃº Ã½</h2>
             </div>
             <div className="divide-y divide-slate-100">
               {lowStockProducts.length === 0 && (
-                <p className="p-4 text-sm text-slate-600">Không có sản phẩm sắp hết hàng.</p>
+                <p className="p-4 text-sm text-slate-600">KhÃ´ng cÃ³ sáº£n pháº©m sáº¯p háº¿t hÃ ng.</p>
               )}
               {lowStockProducts.map((product) => (
                 <div key={product.id} className="flex items-center justify-between gap-4 p-4">
                   <div>
                     <p className="font-bold text-slate-950">{product.name}</p>
-                    <p className="text-sm text-slate-500">Tồn kho: {product.stockQuantity}</p>
+                    <p className="text-sm text-slate-500">Tá»“n kho: {product.stockQuantity}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => startEditProduct(product)}
                     className="rounded bg-slate-900 px-3 py-2 text-sm font-bold text-white"
                   >
-                    Cập nhật
+                    Cáº­p nháº­t
                   </button>
                 </div>
               ))}
@@ -464,16 +467,16 @@ function AdminDashboardPage() {
             onSubmit={handleProductSubmit}
           />
           <div className="rounded-md border border-slate-200 bg-white">
-            <TableHeader title="Danh sách sản phẩm" />
+            <TableHeader title="Danh sÃ¡ch sáº£n pháº©m" />
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
                 <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500">
                   <tr>
-                    <th className="px-4 py-3">Sản phẩm</th>
-                    <th className="px-4 py-3">Danh mục</th>
-                    <th className="px-4 py-3">Giá</th>
+                    <th className="px-4 py-3">Sáº£n pháº©m</th>
+                    <th className="px-4 py-3">Danh má»¥c</th>
+                    <th className="px-4 py-3">GiÃ¡</th>
                     <th className="px-4 py-3">Kho</th>
-                    <th className="px-4 py-3 text-right">Thao tác</th>
+                    <th className="px-4 py-3 text-right">Thao tÃ¡c</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -492,14 +495,14 @@ function AdminDashboardPage() {
                             onClick={() => startEditProduct(product)}
                             className="rounded bg-slate-900 px-3 py-2 text-xs font-bold text-white"
                           >
-                            Sửa
+                            Sá»­a
                           </button>
                           <button
                             type="button"
                             onClick={() => handleDeleteProduct(product.id)}
                             className="rounded bg-red-50 px-3 py-2 text-xs font-bold text-red-600"
                           >
-                            Xóa
+                            XÃ³a
                           </button>
                         </div>
                       </td>
@@ -522,13 +525,13 @@ function AdminDashboardPage() {
             onSubmit={handleCategorySubmit}
           />
           <div className="rounded-md border border-slate-200 bg-white">
-            <TableHeader title="Danh sách danh mục" />
+            <TableHeader title="Danh sÃ¡ch danh má»¥c" />
             <div className="divide-y divide-slate-100">
               {categories.map((category) => (
                 <div key={category.id} className="flex items-center justify-between gap-4 p-4">
                   <div>
                     <p className="font-bold text-slate-950">{category.name}</p>
-                    <p className="text-sm text-slate-500">{category.description || 'Chưa có mô tả'}</p>
+                    <p className="text-sm text-slate-500">{category.description || 'ChÆ°a cÃ³ mÃ´ táº£'}</p>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -536,14 +539,14 @@ function AdminDashboardPage() {
                       onClick={() => startEditCategory(category)}
                       className="rounded bg-slate-900 px-3 py-2 text-xs font-bold text-white"
                     >
-                      Sửa
+                      Sá»­a
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteCategory(category.id)}
                       className="rounded bg-red-50 px-3 py-2 text-xs font-bold text-red-600"
                     >
-                      Xóa
+                      XÃ³a
                     </button>
                   </div>
                 </div>
@@ -563,7 +566,7 @@ function AdminDashboardPage() {
             onSubmit={handleBannerSubmit}
           />
           <div className="rounded-md border border-slate-200 bg-white">
-            <TableHeader title="Danh sách banner" />
+            <TableHeader title="Danh sÃ¡ch banner" />
             <div className="divide-y divide-slate-100">
               {banners.map((banner) => (
                 <div key={banner.id} className="grid gap-4 p-4 lg:grid-cols-[180px_1fr_auto]">
@@ -574,9 +577,9 @@ function AdminDashboardPage() {
                   />
                   <div>
                     <p className="font-black text-slate-950">{banner.title}</p>
-                    <p className="text-sm text-slate-500">{banner.subtitle || 'Chưa có mô tả'}</p>
+                    <p className="text-sm text-slate-500">{banner.subtitle || 'ChÆ°a cÃ³ mÃ´ táº£'}</p>
                     <p className="mt-2 text-xs font-bold uppercase text-slate-500">
-                      {banner.active ? 'Đang hiển thị' : 'Đang ẩn'} - Thứ tự {banner.sortOrder}
+                      {banner.active ? 'Äang hiá»ƒn thá»‹' : 'Äang áº©n'} - Thá»© tá»± {banner.sortOrder}
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
@@ -585,20 +588,20 @@ function AdminDashboardPage() {
                       onClick={() => startEditBanner(banner)}
                       className="rounded bg-slate-900 px-3 py-2 text-xs font-bold text-white"
                     >
-                      Sửa
+                      Sá»­a
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeleteBanner(banner.id)}
                       className="rounded bg-red-50 px-3 py-2 text-xs font-bold text-red-600"
                     >
-                      Xóa
+                      XÃ³a
                     </button>
                   </div>
                 </div>
               ))}
               {banners.length === 0 && (
-                <p className="p-6 text-center text-sm text-slate-600">Chưa có banner.</p>
+                <p className="p-6 text-center text-sm text-slate-600">ChÆ°a cÃ³ banner.</p>
               )}
             </div>
           </div>
@@ -607,12 +610,12 @@ function AdminDashboardPage() {
 
       {!isLoading && activeTab === 'orders' && (
         <div className="rounded-md border border-slate-200 bg-white">
-          <TableHeader title="Quản lý đơn hàng" />
+          <TableHeader title="Quáº£n lÃ½ Ä‘Æ¡n hÃ ng" />
           <div className="divide-y divide-slate-100">
             {orders.map((order) => (
               <div key={order.id} className="grid gap-4 p-4 xl:grid-cols-[1fr_180px_180px]">
                 <div>
-                  <p className="font-black text-slate-950">Đơn #{order.id}</p>
+                  <p className="font-black text-slate-950">ÄÆ¡n #{order.id}</p>
                   <p className="text-sm text-slate-600">
                     {order.customerName} - {order.customerPhone}
                   </p>
@@ -622,14 +625,14 @@ function AdminDashboardPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase text-slate-500">Tổng tiền</p>
+                  <p className="text-xs font-bold uppercase text-slate-500">Tá»•ng tiá»n</p>
                   <p className="font-black text-[#d71920]">
                     {currencyFormatter.format(order.totalAmount)}
                   </p>
                 </div>
                 <div>
                   <label className="text-xs font-bold uppercase text-slate-500">
-                    Trạng thái
+                    Tráº¡ng thÃ¡i
                   </label>
                   <select
                     value={order.status}
@@ -648,7 +651,7 @@ function AdminDashboardPage() {
               </div>
             ))}
             {orders.length === 0 && (
-              <p className="p-6 text-center text-sm text-slate-600">Chưa có đơn hàng.</p>
+              <p className="p-6 text-center text-sm text-slate-600">ChÆ°a cÃ³ Ä‘Æ¡n hÃ ng.</p>
             )}
           </div>
         </div>
@@ -656,7 +659,7 @@ function AdminDashboardPage() {
 
       {!isLoading && activeTab === 'users' && (
         <div className="rounded-md border border-slate-200 bg-white">
-          <TableHeader title="Danh sách người dùng" />
+          <TableHeader title="Danh sÃ¡ch ngÆ°á»i dÃ¹ng" />
           <div className="divide-y divide-slate-100">
             {users.map((user) => (
               <div key={user.id} className="space-y-4 p-4">
@@ -665,15 +668,15 @@ function AdminDashboardPage() {
                     <p className="font-black text-slate-950">{user.username}</p>
                     <p className="text-sm font-semibold text-slate-500">{user.role}</p>
                     <p className="mt-1 text-sm text-slate-600">
-                      {[user.fullName, user.phone, user.address].filter(Boolean).join(' · ') || 'Chưa lưu thông tin nhận hàng'}
+                      {[user.fullName, user.phone, user.address].filter(Boolean).join(' Â· ') || 'ChÆ°a lÆ°u thÃ´ng tin nháº­n hÃ ng'}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-right text-sm">
                     <span className="rounded bg-slate-100 px-3 py-2 font-bold text-slate-700">
-                      {user.orderCount} đơn đã mua
+                      {user.orderCount} Ä‘Æ¡n Ä‘Ã£ mua
                     </span>
                     <span className="rounded bg-slate-100 px-3 py-2 font-bold text-slate-700">
-                      {user.reviewCount} bình luận
+                      {user.reviewCount} bÃ¬nh luáº­n
                     </span>
                   </div>
                 </div>
@@ -681,46 +684,46 @@ function AdminDashboardPage() {
                 <div className="grid gap-4 xl:grid-cols-2">
                   <div className="rounded-md border border-slate-200">
                     <div className="border-b border-slate-200 px-3 py-2 text-xs font-black uppercase text-slate-500">
-                      Đơn đã mua
+                      ÄÆ¡n Ä‘Ã£ mua
                     </div>
                     <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
                       {user.orders.map((order) => (
                         <div key={order.id} className="p-3 text-sm">
                           <div className="flex items-center justify-between gap-3">
-                            <span className="font-black text-slate-900">Đơn #{order.id}</span>
+                            <span className="font-black text-slate-900">ÄÆ¡n #{order.id}</span>
                             <span className="font-black text-[#d71920]">{currencyFormatter.format(order.totalAmount)}</span>
                           </div>
-                          <p className="mt-1 text-slate-500">{order.status} · {new Date(order.createdAt).toLocaleString('vi-VN')}</p>
+                          <p className="mt-1 text-slate-500">{order.status} Â· {new Date(order.createdAt).toLocaleString('vi-VN')}</p>
                           <p className="mt-1 text-slate-600">{order.items.map((item) => `${item.productName} x${item.quantity}`).join(', ')}</p>
                         </div>
                       ))}
-                      {user.orders.length === 0 && <p className="p-3 text-sm text-slate-500">Chưa có đơn hàng.</p>}
+                      {user.orders.length === 0 && <p className="p-3 text-sm text-slate-500">ChÆ°a cÃ³ Ä‘Æ¡n hÃ ng.</p>}
                     </div>
                   </div>
 
                   <div className="rounded-md border border-slate-200">
                     <div className="border-b border-slate-200 px-3 py-2 text-xs font-black uppercase text-slate-500">
-                      Bình luận đã gửi
+                      BÃ¬nh luáº­n Ä‘Ã£ gá»­i
                     </div>
                     <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
                       {user.reviews.map((review) => (
                         <div key={review.id} className="p-3 text-sm">
                           <div className="flex items-center justify-between gap-3">
-                            <span className="font-black text-slate-900">{review.productName || 'Sản phẩm đã xóa'}</span>
+                            <span className="font-black text-slate-900">{review.productName || 'Sáº£n pháº©m Ä‘Ã£ xÃ³a'}</span>
                             <span className="font-black text-yellow-600">{review.rating}/5 sao</span>
                           </div>
                           {review.comment && <p className="mt-1 text-slate-700">{review.comment}</p>}
                           <p className="mt-1 text-xs text-slate-500">{new Date(review.createdAt).toLocaleString('vi-VN')}</p>
                         </div>
                       ))}
-                      {user.reviews.length === 0 && <p className="p-3 text-sm text-slate-500">Chưa có bình luận.</p>}
+                      {user.reviews.length === 0 && <p className="p-3 text-sm text-slate-500">ChÆ°a cÃ³ bÃ¬nh luáº­n.</p>}
                     </div>
                   </div>
                 </div>
               </div>
             ))}
             {users.length === 0 && (
-              <p className="p-6 text-center text-sm text-slate-600">Chưa có người dùng.</p>
+              <p className="p-6 text-center text-sm text-slate-600">ChÆ°a cÃ³ ngÆ°á»i dÃ¹ng.</p>
             )}
           </div>
         </div>
@@ -744,20 +747,20 @@ function MonthlyRevenuePanel({
     <div className="rounded-md border border-slate-200 bg-white">
       <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="font-black uppercase text-slate-950">Doanh thu theo tháng</h2>
-          <p className="text-sm text-slate-500">Bấm vào cột hoặc chọn tháng để xem chỉ số riêng từng tháng.</p>
+          <h2 className="font-black uppercase text-slate-950">Doanh thu theo thÃ¡ng</h2>
+          <p className="text-sm text-slate-500">Báº¥m vÃ o cá»™t hoáº·c chá»n thÃ¡ng Ä‘á»ƒ xem chá»‰ sá»‘ riÃªng tá»«ng thÃ¡ng.</p>
         </div>
         <select
           value={selectedMonth}
           onChange={(event) => onSelectMonth(event.target.value)}
           className="rounded border border-slate-300 px-3 py-2 text-sm font-bold outline-none focus:border-[#d71920]"
         >
-          <option value="">Tất cả tháng</option>
+          <option value="">Táº¥t cáº£ thÃ¡ng</option>
           {data.map((item) => {
             const monthKey = `${item.year}-${String(item.month).padStart(2, '0')}`;
             return (
               <option key={monthKey} value={monthKey}>
-                Tháng {item.month}/{item.year}
+                ThÃ¡ng {item.month}/{item.year}
               </option>
             );
           })}
@@ -767,16 +770,16 @@ function MonthlyRevenuePanel({
         <MonthlyRevenueChart data={data} selectedMonth={selectedMonth} onSelectMonth={onSelectMonth} />
         <div className="rounded-md bg-slate-950 p-4 text-white">
           <p className="text-xs font-black uppercase text-red-300">
-            {selectedData ? `Tháng ${selectedData.month}/${selectedData.year}` : 'Tổng quan'}
+            {selectedData ? `ThÃ¡ng ${selectedData.month}/${selectedData.year}` : 'Tá»•ng quan'}
           </p>
           <p className="mt-3 text-2xl font-black">
             {currencyFormatter.format(selectedData?.revenue ?? data.reduce((sum, item) => sum + item.revenue, 0))}
           </p>
           <p className="mt-1 text-sm text-slate-300">
-            {selectedData?.orderCount ?? data.reduce((sum, item) => sum + item.orderCount, 0)} đơn hàng đã tính doanh thu
+            {selectedData?.orderCount ?? data.reduce((sum, item) => sum + item.orderCount, 0)} Ä‘Æ¡n hÃ ng Ä‘Ã£ tÃ­nh doanh thu
           </p>
           <p className="mt-4 text-xs leading-5 text-slate-400">
-            Doanh thu chỉ tính các đơn ở trạng thái PROCESSING, SHIPPED hoặc DELIVERED.
+            Doanh thu chá»‰ tÃ­nh cÃ¡c Ä‘Æ¡n á»Ÿ tráº¡ng thÃ¡i PROCESSING, SHIPPED hoáº·c DELIVERED.
           </p>
         </div>
       </div>
@@ -806,8 +809,8 @@ function DashboardCharts({
   const maxPurchase = Math.max(...topProducts.map((product) => product.purchaseCount || 0), 1);
   const activeUsers = users.filter((user) => user.orderCount > 0 || user.reviewCount > 0).length;
   const userActivity = [
-    { label: 'Có hoạt động', value: activeUsers },
-    { label: 'Chưa hoạt động', value: Math.max(users.length - activeUsers, 0) },
+    { label: 'CÃ³ hoáº¡t Ä‘á»™ng', value: activeUsers },
+    { label: 'ChÆ°a hoáº¡t Ä‘á»™ng', value: Math.max(users.length - activeUsers, 0) },
   ];
 
   return (
@@ -815,14 +818,14 @@ function DashboardCharts({
       <div className="rounded-md border border-slate-200 bg-white">
         <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
           <BarChart3 className="h-5 w-5 text-[#d71920]" />
-          <h2 className="font-black uppercase text-slate-950">Biểu đồ đơn hàng</h2>
+          <h2 className="font-black uppercase text-slate-950">Biá»ƒu Ä‘á»“ Ä‘Æ¡n hÃ ng</h2>
         </div>
         <div className="space-y-3 p-4">
           {statusRows.map((row) => (
             <div key={row.label} className="space-y-1">
               <div className="flex justify-between text-sm font-bold text-slate-700">
                 <span>{row.label}</span>
-                <span>{row.value} đơn</span>
+                <span>{row.value} Ä‘Æ¡n</span>
               </div>
               <div className="h-3 overflow-hidden rounded-full bg-slate-100">
                 <div
@@ -837,7 +840,7 @@ function DashboardCharts({
 
       <div className="rounded-md border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-4 py-3">
-          <h2 className="font-black uppercase text-slate-950">Người dùng</h2>
+          <h2 className="font-black uppercase text-slate-950">NgÆ°á»i dÃ¹ng</h2>
         </div>
         <div className="space-y-3 p-4">
           {userActivity.map((row) => (
@@ -859,7 +862,7 @@ function DashboardCharts({
 
       <div className="rounded-md border border-slate-200 bg-white xl:col-span-2">
         <div className="border-b border-slate-200 px-4 py-3">
-          <h2 className="font-black uppercase text-slate-950">Top sản phẩm bán chạy</h2>
+          <h2 className="font-black uppercase text-slate-950">Top sáº£n pháº©m bÃ¡n cháº¡y</h2>
         </div>
         <div className="grid gap-3 p-4 md:grid-cols-5">
           {topProducts.map((product) => (
@@ -871,11 +874,11 @@ function DashboardCharts({
                 />
               </div>
               <p className="line-clamp-2 min-h-10 text-xs font-black uppercase text-slate-800">{product.name}</p>
-              <p className="mt-1 text-sm font-black text-[#d71920]">Đã bán {product.purchaseCount || 0}</p>
+              <p className="mt-1 text-sm font-black text-[#d71920]">ÄÃ£ bÃ¡n {product.purchaseCount || 0}</p>
             </div>
           ))}
           {topProducts.length === 0 && (
-            <p className="col-span-full p-4 text-center text-sm text-slate-500">Chưa có dữ liệu sản phẩm.</p>
+            <p className="col-span-full p-4 text-center text-sm text-slate-500">ChÆ°a cÃ³ dá»¯ liá»‡u sáº£n pháº©m.</p>
           )}
         </div>
       </div>
@@ -928,9 +931,9 @@ function ProductForm({
     try {
       const imageUrl = await uploadImage(file);
       setProductForm({ ...productForm, imageUrl });
-      toast.success('Đã tải ảnh sản phẩm');
+      toast.success('ÄÃ£ táº£i áº£nh sáº£n pháº©m');
     } catch {
-      toast.error('Không tải được ảnh');
+      toast.error('KhÃ´ng táº£i Ä‘Æ°á»£c áº£nh');
     } finally {
       setIsUploading(false);
     }
@@ -941,20 +944,25 @@ function ProductForm({
       <div className="flex items-center gap-2">
         <PackagePlus className="h-5 w-5 text-[#d71920]" />
         <h2 className="font-black uppercase text-slate-950">
-          {editingProductId ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}
+          {editingProductId ? 'Sá»­a sáº£n pháº©m' : 'ThÃªm sáº£n pháº©m'}
         </h2>
       </div>
 
-      <AdminInput
+            <AdminInput
         label="Tên sản phẩm"
         value={productForm.name}
         required
         onChange={(value) => setProductForm({ ...productForm, name: value })}
       />
-      <AdminInput
-        label="Mô tả"
+            <RichTextEditor
+        label="Bài viết mô tả sản phẩm"
         value={productForm.description}
         onChange={(value) => setProductForm({ ...productForm, description: value })}
+      />
+      <RichTextEditor
+        label="Thông số kỹ thuật"
+        value={productForm.specifications}
+        onChange={(value) => setProductForm({ ...productForm, specifications: value })}
       />
       <AdminInput
         label="Thời gian bảo hành"
@@ -962,30 +970,30 @@ function ProductForm({
         onChange={(value) => setProductForm({ ...productForm, warrantyPeriod: value })}
       />
       <AdminInput
-        label="Ảnh sản phẩm"
+        label="áº¢nh sáº£n pháº©m"
         value={productForm.imageUrl}
         onChange={(value) => setProductForm({ ...productForm, imageUrl: value })}
       />
       <label className="block text-sm font-bold text-slate-700">
-        Tải ảnh từ máy
+        Táº£i áº£nh tá»« mÃ¡y
         <input
           type="file"
           accept="image/*"
           onChange={(event) => handleImageUpload(event.target.files?.[0])}
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
         />
-        {isUploading && <span className="mt-1 block text-xs text-slate-500">Đang tải ảnh...</span>}
+        {isUploading && <span className="mt-1 block text-xs text-slate-500">Äang táº£i áº£nh...</span>}
       </label>
       <div className="grid gap-3 sm:grid-cols-2">
         <AdminInput
-          label="Giá"
+          label="GiÃ¡"
           type="number"
           value={String(productForm.price)}
           required
           onChange={(value) => setProductForm({ ...productForm, price: Number(value) })}
         />
         <AdminInput
-          label="Tồn kho"
+          label="Tá»“n kho"
           type="number"
           value={String(productForm.stockQuantity)}
           required
@@ -996,7 +1004,7 @@ function ProductForm({
       </div>
 
       <label className="block text-sm font-bold text-slate-700">
-        Danh mục
+        Danh má»¥c
         <select
           value={productForm.categoryId ?? ''}
           onChange={(event) =>
@@ -1007,7 +1015,7 @@ function ProductForm({
           }
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#d71920]"
         >
-          <option value="">Chưa chọn danh mục</option>
+          <option value="">ChÆ°a chá»n danh má»¥c</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -1022,7 +1030,7 @@ function ProductForm({
           className="inline-flex flex-1 items-center justify-center gap-2 rounded bg-[#d71920] px-4 py-2 text-sm font-black uppercase text-white"
         >
           <Save className="h-4 w-4" />
-          Lưu
+          LÆ°u
         </button>
         {editingProductId && (
           <button
@@ -1033,7 +1041,7 @@ function ProductForm({
             }}
             className="rounded bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700"
           >
-            Hủy
+            Há»§y
           </button>
         )}
       </div>
@@ -1059,16 +1067,16 @@ function CategoryForm({
   return (
     <form onSubmit={onSubmit} className="space-y-4 rounded-md border border-slate-200 bg-white p-4">
       <h2 className="font-black uppercase text-slate-950">
-        {editingCategoryId ? 'Sửa danh mục' : 'Thêm danh mục'}
+        {editingCategoryId ? 'Sá»­a danh má»¥c' : 'ThÃªm danh má»¥c'}
       </h2>
       <AdminInput
-        label="Tên danh mục"
+        label="TÃªn danh má»¥c"
         value={categoryForm.name}
         required
         onChange={(value) => setCategoryForm({ ...categoryForm, name: value })}
       />
       <AdminInput
-        label="Mô tả"
+        label="MÃ´ táº£"
         value={categoryForm.description}
         onChange={(value) => setCategoryForm({ ...categoryForm, description: value })}
       />
@@ -1078,7 +1086,7 @@ function CategoryForm({
           className="inline-flex flex-1 items-center justify-center gap-2 rounded bg-[#d71920] px-4 py-2 text-sm font-black uppercase text-white"
         >
           <Save className="h-4 w-4" />
-          Lưu
+          LÆ°u
         </button>
         {editingCategoryId && (
           <button
@@ -1090,7 +1098,7 @@ function CategoryForm({
             className="inline-flex items-center gap-2 rounded bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700"
           >
             <Trash2 className="h-4 w-4" />
-            Hủy
+            Há»§y
           </button>
         )}
       </div>
@@ -1124,9 +1132,9 @@ function BannerForm({
     try {
       const imageUrl = await uploadImage(file);
       setBannerForm({ ...bannerForm, imageUrl });
-      toast.success('Đã tải ảnh banner');
+      toast.success('ÄÃ£ táº£i áº£nh banner');
     } catch {
-      toast.error('Không tải được ảnh banner');
+      toast.error('KhÃ´ng táº£i Ä‘Æ°á»£c áº£nh banner');
     } finally {
       setIsUploading(false);
     }
@@ -1135,42 +1143,42 @@ function BannerForm({
   return (
     <form onSubmit={onSubmit} className="space-y-4 rounded-md border border-slate-200 bg-white p-4">
       <h2 className="font-black uppercase text-slate-950">
-        {editingBannerId ? 'Sửa banner' : 'Thêm banner'}
+        {editingBannerId ? 'Sá»­a banner' : 'ThÃªm banner'}
       </h2>
       <AdminInput
-        label="Tiêu đề"
+        label="TiÃªu Ä‘á»"
         value={bannerForm.title}
         required
         onChange={(value) => setBannerForm({ ...bannerForm, title: value })}
       />
       <AdminInput
-        label="Mô tả ngắn"
+        label="MÃ´ táº£ ngáº¯n"
         value={bannerForm.subtitle}
         onChange={(value) => setBannerForm({ ...bannerForm, subtitle: value })}
       />
       <AdminInput
-        label="Ảnh banner"
+        label="áº¢nh banner"
         value={bannerForm.imageUrl}
         required
         onChange={(value) => setBannerForm({ ...bannerForm, imageUrl: value })}
       />
       <label className="block text-sm font-bold text-slate-700">
-        Tải ảnh từ máy
+        Táº£i áº£nh tá»« mÃ¡y
         <input
           type="file"
           accept="image/*"
           onChange={(event) => handleImageUpload(event.target.files?.[0])}
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
         />
-        {isUploading && <span className="mt-1 block text-xs text-slate-500">Đang tải ảnh...</span>}
+        {isUploading && <span className="mt-1 block text-xs text-slate-500">Äang táº£i áº£nh...</span>}
       </label>
       <AdminInput
-        label="Link khi bấm"
+        label="Link khi báº¥m"
         value={bannerForm.linkUrl}
         onChange={(value) => setBannerForm({ ...bannerForm, linkUrl: value })}
       />
       <AdminInput
-        label="Thứ tự hiển thị"
+        label="Thá»© tá»± hiá»ƒn thá»‹"
         type="number"
         value={String(bannerForm.sortOrder)}
         onChange={(value) => setBannerForm({ ...bannerForm, sortOrder: Number(value) })}
@@ -1181,7 +1189,7 @@ function BannerForm({
           checked={bannerForm.active}
           onChange={(event) => setBannerForm({ ...bannerForm, active: event.target.checked })}
         />
-        Hiển thị ngoài trang chủ
+        Hiá»ƒn thá»‹ ngoÃ i trang chá»§
       </label>
       <div className="flex gap-2">
         <button
@@ -1189,7 +1197,7 @@ function BannerForm({
           className="inline-flex flex-1 items-center justify-center gap-2 rounded bg-[#d71920] px-4 py-2 text-sm font-black uppercase text-white"
         >
           <Save className="h-4 w-4" />
-          Lưu
+          LÆ°u
         </button>
         {editingBannerId && (
           <button
@@ -1200,7 +1208,7 @@ function BannerForm({
             }}
             className="rounded bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700"
           >
-            Hủy
+            Há»§y
           </button>
         )}
       </div>
@@ -1238,3 +1246,5 @@ function AdminInput({
 }
 
 export default AdminDashboardPage;
+
+

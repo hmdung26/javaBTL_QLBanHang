@@ -21,6 +21,8 @@ public class ProductResponseDTO {
 
     private String description;
 
+    private String specifications;
+
     private BigDecimal price;
 
     private int stockQuantity;

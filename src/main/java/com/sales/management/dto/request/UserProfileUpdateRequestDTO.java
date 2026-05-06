@@ -1,5 +1,6 @@
 package com.sales.management.dto.request;
 
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,7 @@ public class UserProfileUpdateRequestDTO {
     private String fullName;
 
     @Size(max = 50, message = "Phone must not exceed 50 characters")
+    @Pattern(regexp = "^$|^[0-9+\\-\\s]{8,20}$", message = "Phone is invalid")
     private String phone;
 
     @Size(max = 1000, message = "Address must not exceed 1000 characters")

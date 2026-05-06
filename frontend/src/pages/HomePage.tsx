@@ -70,9 +70,24 @@ function HomePage() {
 
 function HomeSection({ title, products }: { title: string; products: Product[] }) {
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const loopProducts = useMemo(() => {
+    if (products.length === 0) {
+      return [];
+    }
+
+    if (products.length < 3) {
+      return Array.from({ length: 6 }, () => products).flat();
+    }
+
+    if (products.length < 6) {
+      return Array.from({ length: 3 }, () => products).flat();
+    }
+
+    return products;
+  }, [products]);
 
   useEffect(() => {
-    if (products.length <= 4) {
+    if (loopProducts.length === 0) {
       return undefined;
     }
 
@@ -82,16 +97,18 @@ function HomeSection({ title, products }: { title: string; products: Product[] }
         return;
       }
 
-      const nextLeft = container.scrollLeft + container.clientWidth;
+      const card = container.querySelector<HTMLElement>('[data-carousel-card]');
+      const step = card ? card.offsetWidth + 16 : 260;
+      const nextLeft = container.scrollLeft + step;
       if (nextLeft >= container.scrollWidth - 8) {
         container.scrollTo({ left: 0, behavior: 'smooth' });
       } else {
         container.scrollTo({ left: nextLeft, behavior: 'smooth' });
       }
-    }, 4500);
+    }, 3200);
 
     return () => window.clearInterval(timer);
-  }, [products.length]);
+  }, [loopProducts.length]);
 
   function slide(direction: number) {
     scrollRef.current?.scrollBy({
@@ -105,7 +122,7 @@ function HomeSection({ title, products }: { title: string; products: Product[] }
       <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
         <h2 className="text-xl font-black uppercase text-slate-950">{title}</h2>
         <div className="flex items-center gap-2">
-          {products.length > 4 && (
+          {products.length > 0 && (
             <>
               <button
                 type="button"
@@ -129,8 +146,8 @@ function HomeSection({ title, products }: { title: string; products: Product[] }
         </div>
       </div>
       <div ref={scrollRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {products.map((product) => (
-          <div key={product.id} className="w-[260px] shrink-0 snap-start sm:w-[280px] xl:w-[300px]">
+        {loopProducts.map((product, index) => (
+          <div key={`${product.id}-${index}`} data-carousel-card className="w-[235px] shrink-0 snap-start sm:w-[255px] xl:w-[275px]">
             <ProductCard product={product} />
           </div>
         ))}

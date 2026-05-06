@@ -130,7 +130,7 @@ function HomeSection({ title, products }: { title: string; products: Product[] }
       </div>
       <div ref={scrollRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {products.map((product) => (
-          <div key={product.id} className="min-w-[260px] snap-start sm:min-w-[calc(50%-0.5rem)] lg:min-w-[calc(25%-0.75rem)]">
+          <div key={product.id} className="w-[260px] shrink-0 snap-start sm:w-[280px] xl:w-[300px]">
             <ProductCard product={product} />
           </div>
         ))}

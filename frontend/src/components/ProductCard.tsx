@@ -26,12 +26,12 @@ function ProductCard({ product }: ProductCardProps) {
   }
 
   return (
-    <article className="stagger-card group flex h-full flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-red-300 hover:shadow-lg">
-      <div className="relative aspect-[4/3] bg-slate-100">
+    <article className="stagger-card group flex h-[560px] w-full flex-col overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-red-300 hover:shadow-lg">
+      <div className="relative h-[210px] shrink-0 bg-white">
         <img
           src={imageUrl}
           alt={product.name}
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          className="h-full w-full object-contain p-2 transition duration-300 group-hover:scale-105"
           loading="lazy"
         />
         <span className="absolute left-2 top-2 rounded-sm bg-[#d71920] px-2 py-1 text-xs font-bold text-white">
@@ -44,17 +44,17 @@ function ProductCard({ product }: ProductCardProps) {
         )}
       </div>
 
-      <div className="flex flex-1 flex-col space-y-3 p-3">
+      <div className="flex min-h-0 flex-1 flex-col space-y-3 p-3">
         <div className="space-y-2">
-          <Link to={`/products/${product.id}`} className="block min-h-12 text-sm font-bold uppercase leading-5 text-slate-950 group-hover:text-[#d71920]">
+          <Link to={`/products/${product.id}`} className="line-clamp-3 min-h-[60px] text-sm font-bold uppercase leading-5 text-slate-950 group-hover:text-[#d71920]">
             {product.name}
           </Link>
-          <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600">
+          <div className="flex h-5 items-center gap-1.5 text-xs font-medium text-emerald-600">
             <BadgeCheck className="h-4 w-4" />
             {product.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng'}
           </div>
-          {product.categoryName && <p className="text-sm text-slate-500">{product.categoryName}</p>}
-          <div className="flex flex-wrap items-center gap-3 text-xs font-bold text-slate-500">
+          <p className="line-clamp-1 h-5 text-sm text-slate-500">{product.categoryName || 'Chưa phân loại'}</p>
+          <div className="flex h-5 flex-wrap items-center gap-3 overflow-hidden text-xs font-bold text-slate-500">
             <span className="inline-flex items-center gap-1 text-yellow-600">
               <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
               {(product.averageRating || 0).toFixed(1)}
@@ -69,7 +69,7 @@ function ProductCard({ product }: ProductCardProps) {
 
         <div className="space-y-2">
           <p className="text-xl font-black text-[#d71920]">{currencyFormatter.format(product.price)}</p>
-          <div className="rounded border border-dashed border-yellow-300 bg-yellow-50 px-2 py-1.5 text-xs text-yellow-800">
+          <div className="line-clamp-2 min-h-[44px] rounded border border-dashed border-yellow-300 bg-yellow-50 px-2 py-1.5 text-xs leading-5 text-yellow-800">
             <span className="inline-flex items-center gap-1 font-semibold">
               <Gift className="h-3.5 w-3.5" />
               Khuyến mại:

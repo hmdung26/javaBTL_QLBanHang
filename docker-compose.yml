@@ -30,6 +30,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
       JWT_SECRET: ${JWT_SECRET:-sales-management-demo-secret-key-please-change-in-production}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      JPA_SHOW_SQL: ${JPA_SHOW_SQL:-false}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       APP_UPLOAD_DIR: /app/uploads
     volumes:

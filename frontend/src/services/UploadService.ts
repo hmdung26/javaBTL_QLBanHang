@@ -12,7 +12,5 @@ export async function uploadImage(file: File): Promise<string> {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 
-  return response.data.url.startsWith('http')
-    ? response.data.url
-    : `http://localhost:8080${response.data.url}`;
+  return response.data.url;
 }

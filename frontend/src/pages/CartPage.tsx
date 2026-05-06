@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useCart } from '../contexts/CartContext';
@@ -19,7 +19,7 @@ function CartPage() {
     removeFromCart,
     updateQuantity,
   } = useCart();
-  const auth = getAuth();
+  const auth = useMemo(() => getAuth(), []);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');

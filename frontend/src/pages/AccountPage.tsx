@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { PackageCheck, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react';
 import { fetchCurrentUser, getAuth, logout, updateCurrentUser } from '../services/AuthService';
@@ -12,7 +12,7 @@ const currencyFormatter = new Intl.NumberFormat('vi-VN', {
 });
 
 function AccountPage() {
-  const auth = getAuth();
+  const auth = useMemo(() => getAuth(), []);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [fullName, setFullName] = useState('');

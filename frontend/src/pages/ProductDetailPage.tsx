@@ -26,6 +26,8 @@ const currencyFormatter = new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 0,
 });
 
+const placeholderImage = 'https://placehold.co/900x700/e5e7eb/334155?text=No+Image';
+
 function ProductDetailPage() {
   const { id } = useParams();
   const { addToCart } = useCart();
@@ -49,7 +51,7 @@ function ProductDetailPage() {
       try {
         const productData = await fetchProductById(Number(id));
         setProduct(productData);
-        setSelectedImage(productData.imageUrl || 'https://placehold.co/900x700/e5e7eb/334155?text=No+Image');
+        setSelectedImage(productData.imageUrl || placeholderImage);
         setReviews(await fetchProductReviews(productData.id));
 
         const related = await fetchProducts({
@@ -77,11 +79,7 @@ function ProductDetailPage() {
 
   const oldPrice = Math.round(product.price * 1.04);
   const saving = oldPrice - product.price;
-  const imageList = [
-    product.imageUrl || 'https://placehold.co/900x700/e5e7eb/334155?text=No+Image',
-    'https://placehold.co/900x700/111827/ffffff?text=TTG+SALES',
-    'https://placehold.co/900x700/d71920/ffffff?text=PC+DETAIL',
-  ];
+  const imageList = [product.imageUrl || placeholderImage];
   const specificationsHtml = product.specifications || '<p>Chưa có thông số kỹ thuật cho sản phẩm này.</p>';
   const descriptionHtml = product.description || '<p>Sản phẩm cấu hình ổn định, phù hợp nhu cầu học tập, làm việc và giải trí.</p>';
 
@@ -154,21 +152,23 @@ function ProductDetailPage() {
           <div className="overflow-hidden rounded-md border border-slate-200 bg-slate-100">
             <img src={selectedImage} alt={product.name} className="aspect-square w-full object-cover transition duration-500 hover:scale-105" />
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            {imageList.map((image) => (
-              <button
-                key={image}
-                type="button"
-                onClick={() => setSelectedImage(image)}
-                className={[
-                  'overflow-hidden rounded border bg-slate-100 p-1',
-                  selectedImage === image ? 'border-[#d71920]' : 'border-slate-200',
-                ].join(' ')}
-              >
-                <img src={image} alt={product.name} className="aspect-[4/3] w-full object-cover" />
-              </button>
-            ))}
-          </div>
+          {product.imageUrl && (
+            <div className="grid grid-cols-3 gap-3">
+              {imageList.map((image) => (
+                <button
+                  key={image}
+                  type="button"
+                  onClick={() => setSelectedImage(image)}
+                  className={[
+                    'overflow-hidden rounded border bg-slate-100 p-1',
+                    selectedImage === image ? 'border-[#d71920]' : 'border-slate-200',
+                  ].join(' ')}
+                >
+                  <img src={image} alt={product.name} className="aspect-[4/3] w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">

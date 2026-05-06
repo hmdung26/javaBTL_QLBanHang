@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 import {
   BarChart3,
   Boxes,
@@ -109,6 +110,24 @@ function formatRole(role?: string) {
   return 'Người dùng';
 }
 
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (!axios.isAxiosError(error)) {
+    return fallback;
+  }
+
+  const message = error.response?.data?.message;
+
+  if (typeof message === 'string') {
+    return message;
+  }
+
+  if (message && typeof message === 'object') {
+    return Object.values(message).join(', ');
+  }
+
+  return fallback;
+}
+
 function AdminDashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<AdminTab>((searchParams.get('tab') as AdminTab) || 'overview');
@@ -215,8 +234,8 @@ function AdminDashboardPage() {
       setProductForm(emptyProductForm);
       setEditingProductId(null);
       await loadDashboard();
-    } catch {
-      toast.error('Không lưu được sản phẩm');
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Không lưu được sản phẩm'));
     }
   }
 

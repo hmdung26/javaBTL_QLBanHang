@@ -23,10 +23,10 @@ public class ProductRequestDTO {
     @Size(max = 255, message = "Product name must not exceed 255 characters")
     private String name;
 
-    @Size(max = 50000, message = "Product description must not exceed 50000 characters")
+    @Size(max = 500000, message = "Product description must not exceed 500000 characters")
     private String description;
 
-    @Size(max = 50000, message = "Product specifications must not exceed 50000 characters")
+    @Size(max = 500000, message = "Product specifications must not exceed 500000 characters")
     private String specifications;
 
     @NotNull(message = "Product price is required")

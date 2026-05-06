@@ -45,6 +45,7 @@ public class Product {
 
     private int stockQuantity;
 
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     private String warrantyPeriod;

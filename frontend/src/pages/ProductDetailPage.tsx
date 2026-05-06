@@ -1,4 +1,4 @@
-﻿import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   BadgeCheck,
@@ -58,7 +58,7 @@ function ProductDetailPage() {
         });
         setRelatedProducts(related.filter((item) => item.id !== productData.id).slice(0, 4));
       } catch {
-        toast.error('KhÃ´ng táº£i Ä‘Æ°á»£c chi tiáº¿t sáº£n pháº©m');
+        toast.error('Không tải được chi tiết sản phẩm');
       } finally {
         setIsLoading(false);
       }
@@ -68,11 +68,11 @@ function ProductDetailPage() {
   }, [id]);
 
   if (isLoading) {
-    return <div className="animate-fade-up rounded-md bg-white p-8 text-center text-slate-600">Äang táº£i sáº£n pháº©m...</div>;
+    return <div className="animate-fade-up rounded-md bg-white p-8 text-center text-slate-600">Đang tải sản phẩm...</div>;
   }
 
   if (!product) {
-    return <div className="rounded-md bg-white p-8 text-center text-slate-600">KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.</div>;
+    return <div className="rounded-md bg-white p-8 text-center text-slate-600">Không tìm thấy sản phẩm.</div>;
   }
 
   const oldPrice = Math.round(product.price * 1.04);
@@ -89,13 +89,13 @@ function ProductDetailPage() {
     for (let index = 0; index < quantity; index += 1) {
       addToCart(product as Product);
     }
-    toast.success('ÄÃ£ thÃªm sáº£n pháº©m vÃ o giá»');
+    toast.success('Đã thêm sản phẩm vào giỏ');
   }
 
   async function handleReviewSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!product || !auth) {
-      toast.info('Vui lÃ²ng Ä‘Äƒng nháº­p Ä‘á»ƒ Ä‘Ã¡nh giÃ¡ sáº£n pháº©m');
+      toast.info('Vui lòng đăng nhập để đánh giá sản phẩm');
       return;
     }
 
@@ -112,16 +112,16 @@ function ProductDetailPage() {
       ]);
       setProduct(updatedProduct);
       setReviews(updatedReviews);
-      toast.success('ÄÃ£ gá»­i Ä‘Ã¡nh giÃ¡ sáº£n pháº©m');
+      toast.success('Đã gửi đánh giá sản phẩm');
     } catch {
-      toast.error('KhÃ´ng gá»­i Ä‘Æ°á»£c Ä‘Ã¡nh giÃ¡');
+      toast.error('Không gửi được đánh giá');
     } finally {
       setIsSubmittingReview(false);
     }
   }
 
   async function handleDeleteReview(reviewId: number) {
-    if (!product || !window.confirm('XÃ³a bÃ¬nh luáº­n nÃ y?')) {
+    if (!product || !window.confirm('Xóa bình luận này?')) {
       return;
     }
 
@@ -133,20 +133,20 @@ function ProductDetailPage() {
       ]);
       setProduct(updatedProduct);
       setReviews(updatedReviews);
-      toast.success('ÄÃ£ xÃ³a bÃ¬nh luáº­n');
+      toast.success('Đã xóa bình luận');
     } catch {
-      toast.error('KhÃ´ng xÃ³a Ä‘Æ°á»£c bÃ¬nh luáº­n');
+      toast.error('Không xóa được bình luận');
     }
   }
 
   return (
     <div className="space-y-5">
       <nav className="animate-fade-up flex flex-wrap items-center gap-2 rounded-md bg-white px-4 py-3 text-sm text-slate-500">
-        <Link to="/" className="hover:text-[#d71920]">Trang chá»§</Link>
+        <Link to="/" className="hover:text-[#d71920]">Trang chủ</Link>
         <ChevronRight className="h-4 w-4" />
-        <Link to="/products" className="hover:text-[#d71920]">Sáº£n pháº©m</Link>
+        <Link to="/products" className="hover:text-[#d71920]">Sản phẩm</Link>
         <ChevronRight className="h-4 w-4" />
-        <span className="font-bold text-slate-900">{product.categoryName || 'Chi tiet'}</span>
+        <span className="font-bold text-slate-900">{product.categoryName || 'Chi tiết'}</span>
       </nav>
 
       <section className="animate-fade-up grid gap-5 rounded-md border border-slate-200 bg-white p-4 lg:grid-cols-[520px_1fr]">
@@ -182,8 +182,8 @@ function ProductDetailPage() {
                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                 {(product.averageRating || 0).toFixed(1)} / 5
               </span>
-              <span>{product.reviewCount || 0} Ä‘Ã¡nh giÃ¡</span>
-              <span>ÄÃ£ bÃ¡n {product.purchaseCount || 0}</span>
+              <span>{product.reviewCount || 0} đánh giá</span>
+              <span>Đã bán {product.purchaseCount || 0}</span>
             </div>
           </div>
 
@@ -191,19 +191,19 @@ function ProductDetailPage() {
             <p className="text-3xl font-black text-[#d71920]">{currencyFormatter.format(product.price)}</p>
             <div className="mt-1 flex flex-wrap gap-3 text-sm">
               <span className="text-slate-500 line-through">{currencyFormatter.format(oldPrice)}</span>
-              <span className="font-bold text-emerald-600">Tiet kiem: {currencyFormatter.format(saving)}</span>
+              <span className="font-bold text-emerald-600">Tiết kiệm: {currencyFormatter.format(saving)}</span>
             </div>
           </div>
 
           <div className="grid gap-3 text-sm sm:grid-cols-3">
-            <InfoBadge icon={ShieldCheck} title="Báº£o hÃ nh" value={product.warrantyPeriod || '36 thÃ¡ng'} />
-            <InfoBadge icon={BadgeCheck} title="TÃ¬nh tráº¡ng" value={product.stockQuantity > 0 ? 'CÃ²n hÃ ng' : 'Háº¿t hÃ ng'} />
-            <InfoBadge icon={Truck} title="Giao hÃ ng" value="ToÃ n quá»‘c" />
+            <InfoBadge icon={ShieldCheck} title="Bảo hành" value={product.warrantyPeriod || '36 tháng'} />
+            <InfoBadge icon={BadgeCheck} title="Tình trạng" value={product.stockQuantity > 0 ? 'Còn hàng' : 'Hết hàng'} />
+            <InfoBadge icon={Truck} title="Giao hàng" value="Toàn quốc" />
           </div>
 
           <div className="rounded-md border border-dashed border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
-            <p className="font-black uppercase">Khuyáº¿n máº¡i</p>
-            <p className="mt-1">TÆ° váº¥n nÃ¢ng cáº¥p miá»…n phÃ­, há»— trá»£ láº¯p Ä‘áº·t vÃ  báº£o hÃ nh chÃ­nh hÃ£ng.</p>
+            <p className="font-black uppercase">Khuyến mại</p>
+            <p className="mt-1">Tư vấn nâng cấp miễn phí, hỗ trợ lắp đặt và bảo hành chính hãng.</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -223,14 +223,14 @@ function ProductDetailPage() {
               className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded bg-[#d71920] px-5 text-sm font-black uppercase text-white hover:bg-[#b91319] disabled:bg-slate-300"
             >
               <ShoppingCart className="h-5 w-5" />
-              ThÃªm vÃ o giá»
+              Thêm vào giỏ
             </button>
             <Link
               to="/cart"
               onClick={handleAddToCart}
               className="inline-flex h-11 flex-1 items-center justify-center rounded bg-slate-950 px-5 text-sm font-black uppercase text-white hover:bg-slate-800"
             >
-              Äáº·t hÃ ng
+              Đặt hàng
             </Link>
           </div>
         </div>
@@ -238,7 +238,7 @@ function ProductDetailPage() {
 
       <section className="animate-fade-up rounded-md border border-slate-200 bg-white">
         <div className="border-b border-slate-200 px-4 py-3">
-          <h2 className="font-black uppercase text-slate-950">ThÃ´ng sá»‘ ká»¹ thuáº­t</h2>
+          <h2 className="font-black uppercase text-slate-950">Thông số kỹ thuật</h2>
         </div>
         <div
           className="product-rich-content p-4 text-sm leading-7 text-slate-700"
@@ -259,9 +259,9 @@ function ProductDetailPage() {
       <section className="animate-fade-up rounded-md border border-slate-200 bg-white">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
           <div>
-            <h2 className="font-black uppercase text-slate-950">ÄÃ¡nh giÃ¡ vÃ  bÃ¬nh luáº­n</h2>
+            <h2 className="font-black uppercase text-slate-950">Đánh giá và bình luận</h2>
             <p className="text-sm text-slate-500">
-              Äiá»ƒm trung bÃ¬nh {(product.averageRating || 0).toFixed(1)} tá»« {product.reviewCount || 0} Ä‘Ã¡nh giÃ¡.
+              Điểm trung bình {(product.averageRating || 0).toFixed(1)} từ {product.reviewCount || 0} đánh giá.
             </p>
           </div>
           <div className="inline-flex items-center gap-1 rounded bg-yellow-50 px-3 py-2 font-black text-yellow-700">
@@ -274,7 +274,7 @@ function ProductDetailPage() {
             {auth ? (
               <form onSubmit={handleReviewSubmit} className="space-y-3">
                 <label className="block text-sm font-black uppercase text-slate-700">
-                  Äiá»ƒm Ä‘Ã¡nh giÃ¡
+                  Điểm đánh giá
                   <select
                     value={reviewRating}
                     onChange={(event) => setReviewRating(Number(event.target.value))}
@@ -288,12 +288,12 @@ function ProductDetailPage() {
                   </select>
                 </label>
                 <label className="block text-sm font-black uppercase text-slate-700">
-                  BÃ¬nh luáº­n
+                  Bình luận
                   <textarea
                     value={reviewComment}
                     onChange={(event) => setReviewComment(event.target.value)}
                     rows={4}
-                    placeholder="Chia sáº» tráº£i nghiá»‡m cá»§a báº¡n vá» sáº£n pháº©m"
+                    placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm"
                     className="mt-2 w-full resize-none rounded border border-slate-300 px-3 py-2 text-sm font-medium outline-none focus:border-[#d71920]"
                   />
                 </label>
@@ -303,14 +303,14 @@ function ProductDetailPage() {
                   className="inline-flex w-full items-center justify-center gap-2 rounded bg-[#d71920] px-4 py-2.5 text-sm font-black uppercase text-white disabled:bg-slate-300"
                 >
                   <Send className="h-4 w-4" />
-                  Gá»­i Ä‘Ã¡nh giÃ¡
+                  Gửi đánh giá
                 </button>
               </form>
             ) : (
               <div className="space-y-3 text-sm text-slate-600">
-                <p>Báº¡n cáº§n Ä‘Äƒng nháº­p tÃ i khoáº£n khÃ¡ch hÃ ng Ä‘á»ƒ Ä‘Ã¡nh giÃ¡ vÃ  bÃ¬nh luáº­n sáº£n pháº©m.</p>
+                <p>Bạn cần đăng nhập tài khoản khách hàng để đánh giá và bình luận sản phẩm.</p>
                 <Link to="/login" className="inline-flex rounded bg-slate-950 px-4 py-2 font-black uppercase text-white">
-                  ÄÄƒng nháº­p
+                  Đăng nhập
                 </Link>
               </div>
             )}
@@ -332,7 +332,7 @@ function ProductDetailPage() {
                         onClick={() => handleDeleteReview(review.id)}
                         className="rounded bg-red-50 px-2 py-1 text-xs font-black uppercase text-red-600 hover:bg-red-100"
                       >
-                        XÃ³a
+                        Xóa
                       </button>
                     )}
                   </div>
@@ -342,7 +342,7 @@ function ProductDetailPage() {
             ))}
             {reviews.length === 0 && (
               <p className="rounded-md border border-dashed border-slate-300 p-4 text-center text-sm text-slate-500">
-                ChÆ°a cÃ³ Ä‘Ã¡nh giÃ¡ nÃ o cho sáº£n pháº©m nÃ y.
+                Chưa có đánh giá nào cho sản phẩm này.
               </p>
             )}
           </div>
@@ -351,15 +351,15 @@ function ProductDetailPage() {
 
       <section className="animate-fade-up rounded-md border border-slate-200 bg-white">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-          <h2 className="font-black uppercase text-slate-950">Sáº£n pháº©m tÆ°Æ¡ng tá»±</h2>
-          <Link to="/products" className="text-sm font-black uppercase text-[#d71920]">Xem táº¥t cáº£</Link>
+          <h2 className="font-black uppercase text-slate-950">Sản phẩm tương tự</h2>
+          <Link to="/products" className="text-sm font-black uppercase text-[#d71920]">Xem tất cả</Link>
         </div>
         <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
           {relatedProducts.map((item) => (
             <ProductCard key={item.id} product={item} />
           ))}
           {relatedProducts.length === 0 && (
-            <p className="col-span-full text-center text-sm text-slate-500">ChÆ°a cÃ³ sáº£n pháº©m tÆ°Æ¡ng tá»±.</p>
+            <p className="col-span-full text-center text-sm text-slate-500">Chưa có sản phẩm tương tự.</p>
           )}
         </div>
       </section>

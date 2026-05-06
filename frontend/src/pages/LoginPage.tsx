@@ -5,8 +5,8 @@ import { toast } from 'react-toastify';
 import { login, saveAuth } from '../services/AuthService';
 
 function LoginPage() {
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -40,6 +40,7 @@ function LoginPage() {
             type="text"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
+            autoComplete="username"
             className="mt-1 w-full rounded border border-slate-300 px-3 py-2 outline-none focus:border-[#d71920]"
           />
         </label>
@@ -50,6 +51,7 @@ function LoginPage() {
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
             className="mt-1 w-full rounded border border-slate-300 px-3 py-2 outline-none focus:border-[#d71920]"
           />
         </label>

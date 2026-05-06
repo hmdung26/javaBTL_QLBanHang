@@ -11,6 +11,14 @@ const currencyFormatter = new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 0,
 });
 
+function formatRole(role?: string) {
+  if (role === 'ROLE_ADMIN') {
+    return 'Admin';
+  }
+
+  return 'Người dùng';
+}
+
 function AccountPage() {
   const auth = useMemo(() => getAuth(), []);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -48,7 +56,7 @@ function AccountPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <InfoCard icon={UserRound} label="Tên đăng nhập" value={profile?.username || auth.username} />
-        <InfoCard icon={ShieldCheck} label="Vai trò" value={profile?.role || auth.role} />
+        <InfoCard icon={ShieldCheck} label="Vai trò" value={formatRole(profile?.role || auth.role)} />
         <InfoCard icon={PackageCheck} label="Đơn đã đặt" value={String(orders.length)} />
       </div>
 

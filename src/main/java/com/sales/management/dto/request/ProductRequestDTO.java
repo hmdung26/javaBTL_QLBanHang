@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +39,9 @@ public class ProductRequestDTO {
 
     @Size(max = 1000, message = "Product image URL must not exceed 1000 characters")
     private String imageUrl;
+
+    @Size(max = 20, message = "Product image list must not exceed 20 images")
+    private List<@Size(max = 1000, message = "Product image URL must not exceed 1000 characters") String> imageUrls;
 
     @Size(max = 100, message = "Warranty period must not exceed 100 characters")
     private String warrantyPeriod;

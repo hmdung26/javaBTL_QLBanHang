@@ -79,7 +79,10 @@ function ProductDetailPage() {
 
   const oldPrice = Math.round(product.price * 1.04);
   const saving = oldPrice - product.price;
-  const imageList = [product.imageUrl || placeholderImage];
+  const imageList = Array.from(
+    new Set([...(product.imageUrls ?? []), product.imageUrl].filter(Boolean) as string[]),
+  );
+  const galleryImages = imageList.length ? imageList : [placeholderImage];
   const specificationsHtml = product.specifications || '<p>Chưa có thông số kỹ thuật cho sản phẩm này.</p>';
   const descriptionHtml = product.description || '<p>Sản phẩm cấu hình ổn định, phù hợp nhu cầu học tập, làm việc và giải trí.</p>';
 
@@ -152,9 +155,9 @@ function ProductDetailPage() {
           <div className="overflow-hidden rounded-md border border-slate-200 bg-slate-100">
             <img src={selectedImage} alt={product.name} className="aspect-square w-full object-cover transition duration-500 hover:scale-105" />
           </div>
-          {product.imageUrl && (
+          {galleryImages.length > 1 && (
             <div className="grid grid-cols-3 gap-3">
-              {imageList.map((image) => (
+              {galleryImages.map((image) => (
                 <button
                   key={image}
                   type="button"

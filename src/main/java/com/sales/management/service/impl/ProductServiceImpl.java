@@ -4,6 +4,7 @@ import com.sales.management.dto.request.ProductRequestDTO;
 import com.sales.management.dto.response.ProductResponseDTO;
 import com.sales.management.entity.Category;
 import com.sales.management.entity.Product;
+import com.sales.management.entity.ProductImage;
 import com.sales.management.exception.ResourceNotFoundException;
 import com.sales.management.repository.CategoryRepository;
 import com.sales.management.repository.OrderItemRepository;
@@ -12,10 +13,13 @@ import com.sales.management.repository.ProductReviewRepository;
 import com.sales.management.service.ProductService;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
@@ -26,16 +30,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO createProduct(ProductRequestDTO requestDTO) {
+        List<String> imageUrls = normalizeImageUrls(requestDTO);
         Product product = Product.builder()
                 .name(requestDTO.getName())
                 .description(requestDTO.getDescription())
                 .specifications(requestDTO.getSpecifications())
                 .price(requestDTO.getPrice())
                 .stockQuantity(requestDTO.getStockQuantity())
-                .imageUrl(requestDTO.getImageUrl())
+                .imageUrl(imageUrls.isEmpty() ? null : imageUrls.get(0))
                 .warrantyPeriod(requestDTO.getWarrantyPeriod())
                 .category(findCategoryById(requestDTO.getCategoryId()))
                 .build();
+        replaceProductImages(product, imageUrls);
 
         return toResponseDTO(productRepository.save(product));
     }
@@ -82,14 +88,16 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO requestDTO) {
         Product product = findProductById(id);
+        List<String> imageUrls = normalizeImageUrls(requestDTO);
         product.setName(requestDTO.getName());
         product.setDescription(requestDTO.getDescription());
         product.setSpecifications(requestDTO.getSpecifications());
         product.setPrice(requestDTO.getPrice());
         product.setStockQuantity(requestDTO.getStockQuantity());
-        product.setImageUrl(requestDTO.getImageUrl());
+        product.setImageUrl(imageUrls.isEmpty() ? null : imageUrls.get(0));
         product.setWarrantyPeriod(requestDTO.getWarrantyPeriod());
         product.setCategory(findCategoryById(requestDTO.getCategoryId()));
+        replaceProductImages(product, imageUrls);
 
         return toResponseDTO(productRepository.save(product));
     }
@@ -142,8 +150,47 @@ public class ProductServiceImpl implements ProductService {
         return inStock ? product.getStockQuantity() > 0 : product.getStockQuantity() <= 0;
     }
 
+    private List<String> normalizeImageUrls(ProductRequestDTO requestDTO) {
+        List<String> imageUrls = new ArrayList<>();
+
+        if (requestDTO.getImageUrls() != null) {
+            requestDTO.getImageUrls()
+                    .stream()
+                    .filter(imageUrl -> imageUrl != null && !imageUrl.isBlank())
+                    .map(String::trim)
+                    .forEach(imageUrls::add);
+        }
+
+        if (requestDTO.getImageUrl() != null && !requestDTO.getImageUrl().isBlank()) {
+            String mainImageUrl = requestDTO.getImageUrl().trim();
+            if (!imageUrls.contains(mainImageUrl)) {
+                imageUrls.add(0, mainImageUrl);
+            }
+        }
+
+        return imageUrls.stream().distinct().toList();
+    }
+
+    private void replaceProductImages(Product product, List<String> imageUrls) {
+        product.getImages().clear();
+
+        for (int index = 0; index < imageUrls.size(); index += 1) {
+            product.getImages().add(ProductImage.builder()
+                    .product(product)
+                    .imageUrl(imageUrls.get(index))
+                    .sortOrder(index)
+                    .build());
+        }
+    }
+
     private ProductResponseDTO toResponseDTO(Product product) {
         Category category = product.getCategory();
+        List<String> imageUrls = product.getImages()
+                .stream()
+                .sorted(Comparator.comparingInt(ProductImage::getSortOrder))
+                .map(ProductImage::getImageUrl)
+                .toList();
+        String mainImageUrl = !imageUrls.isEmpty() ? imageUrls.get(0) : product.getImageUrl();
 
         return ProductResponseDTO.builder()
                 .id(product.getId())
@@ -152,7 +199,8 @@ public class ProductServiceImpl implements ProductService {
                 .specifications(product.getSpecifications())
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
-                .imageUrl(product.getImageUrl())
+                .imageUrl(mainImageUrl)
+                .imageUrls(imageUrls)
                 .warrantyPeriod(product.getWarrantyPeriod())
                 .createdAt(product.getCreatedAt())
                 .categoryId(category != null ? category.getId() : null)

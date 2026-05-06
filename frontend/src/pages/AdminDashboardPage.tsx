@@ -62,6 +62,7 @@ const emptyProductForm: ProductRequest = {
   price: 0,
   stockQuantity: 0,
   imageUrl: '',
+  imageUrls: [],
   warrantyPeriod: '',
   categoryId: null,
 };
@@ -248,6 +249,7 @@ function AdminDashboardPage() {
       price: product.price,
       stockQuantity: product.stockQuantity,
       imageUrl: product.imageUrl ?? '',
+      imageUrls: product.imageUrls?.length ? product.imageUrls : product.imageUrl ? [product.imageUrl] : [],
       warrantyPeriod: product.warrantyPeriod ?? '',
       categoryId: product.categoryId,
     });
@@ -1000,15 +1002,23 @@ function ProductForm({
 }: ProductFormProps) {
   const [isUploading, setIsUploading] = useState(false);
 
-  async function handleImageUpload(file: File | undefined) {
-    if (!file) {
+  function updateProductImages(imageUrls: string[]) {
+    setProductForm({
+      ...productForm,
+      imageUrls,
+      imageUrl: imageUrls[0] ?? '',
+    });
+  }
+
+  async function handleImageUpload(files: FileList | null) {
+    if (!files || files.length === 0) {
       return;
     }
 
     setIsUploading(true);
     try {
-      const imageUrl = await uploadImage(file);
-      setProductForm({ ...productForm, imageUrl });
+      const uploadedUrls = await Promise.all(Array.from(files).map((file) => uploadImage(file)));
+      updateProductImages([...productForm.imageUrls, ...uploadedUrls]);
       toast.success('Đã tải ảnh sản phẩm');
     } catch {
       toast.error('Không tải được ảnh');
@@ -1048,20 +1058,51 @@ function ProductForm({
         onChange={(value) => setProductForm({ ...productForm, warrantyPeriod: value })}
       />
       <AdminInput
-        label="Ảnh sản phẩm"
+        label="Ảnh chính"
         value={productForm.imageUrl}
-        onChange={(value) => setProductForm({ ...productForm, imageUrl: value })}
+        onChange={(value) => {
+          const imageUrls = value
+            ? [value, ...productForm.imageUrls.filter((imageUrl) => imageUrl !== value)]
+            : productForm.imageUrls.slice(1);
+          setProductForm({ ...productForm, imageUrl: value, imageUrls });
+        }}
       />
       <label className="block text-sm font-bold text-slate-700">
-        Tải ảnh từ máy
+        Tải nhiều ảnh từ máy
         <input
           type="file"
           accept="image/*"
-          onChange={(event) => handleImageUpload(event.target.files?.[0])}
+          multiple
+          onChange={(event) => handleImageUpload(event.target.files)}
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
         />
         {isUploading && <span className="mt-1 block text-xs text-slate-500">Đang tải ảnh...</span>}
       </label>
+      {productForm.imageUrls.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          {productForm.imageUrls.map((imageUrl) => (
+            <div key={imageUrl} className="overflow-hidden rounded border border-slate-200 bg-white">
+              <img src={imageUrl} alt="Ảnh sản phẩm" className="aspect-[4/3] w-full object-cover" />
+              <div className="grid grid-cols-2 gap-1 p-2">
+                <button
+                  type="button"
+                  onClick={() => updateProductImages([imageUrl, ...productForm.imageUrls.filter((item) => item !== imageUrl)])}
+                  className="rounded bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700"
+                >
+                  Ảnh chính
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateProductImages(productForm.imageUrls.filter((item) => item !== imageUrl))}
+                  className="rounded bg-red-50 px-2 py-1 text-xs font-bold text-red-600"
+                >
+                  Xóa
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       <div className="grid gap-3 sm:grid-cols-2">
         <AdminInput
           label="Giá"

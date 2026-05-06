@@ -2,6 +2,7 @@ package com.sales.management.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,6 +29,8 @@ public class ProductResponseDTO {
     private int stockQuantity;
 
     private String imageUrl;
+
+    private List<String> imageUrls;
 
     private String warrantyPeriod;
 

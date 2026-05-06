@@ -16,6 +16,7 @@ export interface Product {
   price: number;
   stockQuantity: number;
   imageUrl: string | null;
+  imageUrls: string[];
   warrantyPeriod: string | null;
   createdAt: string;
   categoryId: number | null;
@@ -32,6 +33,7 @@ export interface ProductRequest {
   price: number;
   stockQuantity: number;
   imageUrl: string;
+  imageUrls: string[];
   warrantyPeriod: string;
   categoryId: number | null;
 }

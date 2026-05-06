@@ -87,6 +87,14 @@ const orderStatuses: OrderStatus[] = [
   'CANCELLED',
 ];
 
+const orderStatusLabels: Record<OrderStatus, string> = {
+  PENDING: 'Chờ xử lý',
+  PROCESSING: 'Đang xử lý',
+  SHIPPED: 'Đang giao',
+  DELIVERED: 'Đã giao',
+  CANCELLED: 'Đã hủy',
+};
+
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
   currency: 'VND',
@@ -118,6 +126,7 @@ function AdminDashboardPage() {
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
   const [bannerForm, setBannerForm] = useState<BannerRequest>(emptyBannerForm);
   const [editingBannerId, setEditingBannerId] = useState<number | null>(null);
+  const [orderStatusFilter, setOrderStatusFilter] = useState<OrderStatus | 'ALL'>('ALL');
   const [aiReport, setAiReport] = useState('');
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,6 +135,21 @@ function AdminDashboardPage() {
     () => products.filter((product) => product.stockQuantity <= 5),
     [products],
   );
+
+  const visibleOrders = useMemo(() => {
+    return orders
+      .filter((order) => orderStatusFilter === 'ALL' || order.status === orderStatusFilter)
+      .sort((first, second) => {
+        const firstTime = new Date(first.createdAt).getTime();
+        const secondTime = new Date(second.createdAt).getTime();
+
+        if (Number.isFinite(firstTime) && Number.isFinite(secondTime) && firstTime !== secondTime) {
+          return secondTime - firstTime;
+        }
+
+        return second.id - first.id;
+      });
+  }, [orders, orderStatusFilter]);
 
   useEffect(() => {
     loadDashboard();
@@ -618,12 +642,37 @@ function AdminDashboardPage() {
 
       {!isLoading && activeTab === 'orders' && (
         <div className="rounded-md border border-slate-200 bg-white">
-          <TableHeader title="Quản lý đơn hàng" />
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+            <div>
+              <h2 className="font-black uppercase text-slate-950">Quản lý đơn hàng</h2>
+              <p className="mt-1 text-xs font-semibold text-slate-500">
+                Hiển thị {visibleOrders.length} / {orders.length} đơn, đơn mới nhất nằm trên cùng.
+              </p>
+            </div>
+            <label className="text-xs font-bold uppercase text-slate-500">
+              Lọc trạng thái
+              <select
+                value={orderStatusFilter}
+                onChange={(event) => setOrderStatusFilter(event.target.value as OrderStatus | 'ALL')}
+                className="mt-1 block min-w-44 rounded border border-slate-300 px-3 py-2 text-sm font-bold text-slate-800 outline-none focus:border-[#d71920]"
+              >
+                <option value="ALL">Tất cả trạng thái</option>
+                {orderStatuses.map((status) => (
+                  <option key={status} value={status}>
+                    {orderStatusLabels[status]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div className="divide-y divide-slate-100">
-            {orders.map((order) => (
+            {visibleOrders.map((order) => (
               <div key={order.id} className="grid gap-4 p-4 xl:grid-cols-[1fr_180px_180px]">
                 <div>
                   <p className="font-black text-slate-950">Đơn #{order.id}</p>
+                  <p className="text-xs font-semibold text-slate-500">
+                    {new Date(order.createdAt).toLocaleString('vi-VN')}
+                  </p>
                   <p className="text-sm text-slate-600">
                     {order.customerName} - {order.customerPhone}
                   </p>
@@ -651,15 +700,17 @@ function AdminDashboardPage() {
                   >
                     {orderStatuses.map((status) => (
                       <option key={status} value={status}>
-                        {status}
+                        {orderStatusLabels[status]}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
             ))}
-            {orders.length === 0 && (
-              <p className="p-6 text-center text-sm text-slate-600">Chưa có đơn hàng.</p>
+            {visibleOrders.length === 0 && (
+              <p className="p-6 text-center text-sm text-slate-600">
+                {orders.length === 0 ? 'Chưa có đơn hàng.' : 'Không có đơn hàng phù hợp với bộ lọc.'}
+              </p>
             )}
           </div>
         </div>

@@ -17,7 +17,9 @@ function LoginPage() {
       const auth = await login({ username, password });
       saveAuth(auth);
       toast.success('Đăng nhập thành công');
-      window.location.href = auth.role === 'ROLE_ADMIN' ? '/admin/dashboard' : '/account';
+      window.location.href = ['ROLE_ADMIN', 'ROLE_STAFF'].includes(auth.role)
+        ? '/admin/dashboard'
+        : '/account';
     } catch {
       toast.error('Sai tài khoản hoặc mật khẩu');
     } finally {

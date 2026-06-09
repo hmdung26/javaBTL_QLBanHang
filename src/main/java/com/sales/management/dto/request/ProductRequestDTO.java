@@ -47,4 +47,6 @@ public class ProductRequestDTO {
     private String warrantyPeriod;
 
     private Long categoryId;
+
+    private Long brandId;
 }

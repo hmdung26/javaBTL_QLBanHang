@@ -8,7 +8,7 @@ public interface ProductService {
 
     ProductResponseDTO createProduct(ProductRequestDTO requestDTO);
 
-    List<ProductResponseDTO> getAllProducts(String keyword, Long categoryId, Boolean inStock);
+    List<ProductResponseDTO> getAllProducts(String keyword, Long categoryId, Long brandId, Boolean inStock);
 
     List<ProductResponseDTO> getTopRatedProducts(int limit);
 

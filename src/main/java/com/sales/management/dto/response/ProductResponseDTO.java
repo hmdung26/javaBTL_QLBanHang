@@ -40,6 +40,10 @@ public class ProductResponseDTO {
 
     private String categoryName;
 
+    private Long brandId;
+
+    private String brandName;
+
     private double averageRating;
 
     private long reviewCount;

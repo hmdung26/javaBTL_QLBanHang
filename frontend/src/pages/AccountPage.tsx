@@ -3,7 +3,8 @@ import { Link, Navigate } from 'react-router-dom';
 import { PackageCheck, ShieldCheck, UserRound, type LucideIcon } from 'lucide-react';
 import { fetchCurrentUser, getAuth, logout, updateCurrentUser } from '../services/AuthService';
 import { fetchMyOrders } from '../services/OrderService';
-import type { OrderResponse, UserProfile } from '../types';
+import { fetchNotifications, fetchWarranties, lookupWarranty, requestWarranty } from '../services/BusinessService';
+import type { Notification, OrderResponse, UserProfile, Warranty } from '../types';
 
 const currencyFormatter = new Intl.NumberFormat('vi-VN', {
   style: 'currency',
@@ -23,6 +24,10 @@ function AccountPage() {
   const auth = useMemo(() => getAuth(), []);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<OrderResponse[]>([]);
+  const [warranties, setWarranties] = useState<Warranty[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [warrantySerial, setWarrantySerial] = useState('');
+  const [warrantyNote, setWarrantyNote] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -39,6 +44,8 @@ function AccountPage() {
         })
         .catch(() => setProfile(null));
       fetchMyOrders().then(setOrders).catch(() => setOrders([]));
+      fetchWarranties().then(setWarranties).catch(() => setWarranties([]));
+      fetchNotifications().then(setNotifications).catch(() => setNotifications([]));
     }
   }, [auth]);
 
@@ -124,6 +131,9 @@ function AccountPage() {
                 <div className="text-right">
                   <p className="font-black text-[#d71920]">{currencyFormatter.format(order.totalAmount)}</p>
                   <p className="text-xs font-black uppercase text-slate-500">{order.status}</p>
+                  <button type="button" onClick={() => window.print()} className="mt-2 text-xs font-black text-slate-700 underline">
+                    In hóa đơn {order.invoiceNumber || ''}
+                  </button>
                 </div>
               </div>
               <div className="mt-3 divide-y divide-slate-100 rounded bg-slate-50 px-3">
@@ -144,6 +154,60 @@ function AccountPage() {
               <p className="mt-1 text-sm text-slate-500">Hãy đăng nhập trước khi đặt hàng để hệ thống lưu lịch sử tại đây.</p>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="rounded-md border border-slate-200 bg-white p-5">
+        <h2 className="font-black uppercase text-slate-950">Bảo hành sản phẩm</h2>
+        <form
+          className="mt-4 grid gap-3 md:grid-cols-[1fr_2fr_auto]"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            const warranty = await requestWarranty(warrantySerial, warrantyNote);
+            setWarranties((current) => [warranty, ...current.filter((item) => item.id !== warranty.id)]);
+            setWarrantySerial('');
+            setWarrantyNote('');
+          }}
+        >
+          <ProfileInput label="Serial sản phẩm" value={warrantySerial} onChange={setWarrantySerial} />
+          <ProfileInput label="Mô tả lỗi" value={warrantyNote} onChange={setWarrantyNote} />
+          <div className="flex self-end gap-2">
+            <button
+              type="button"
+              className="rounded bg-slate-900 px-4 py-2 text-sm font-black uppercase text-white"
+              onClick={async () => {
+                const warranty = await lookupWarranty(warrantySerial);
+                setWarranties((current) => [warranty, ...current.filter((item) => item.id !== warranty.id)]);
+              }}
+            >
+              Tra cứu
+            </button>
+            <button type="submit" className="rounded bg-[#d71920] px-4 py-2 text-sm font-black uppercase text-white">
+              Gửi yêu cầu
+            </button>
+          </div>
+        </form>
+        <div className="mt-4 space-y-2">
+          {warranties.map((warranty) => (
+            <div key={warranty.id} className="rounded border border-slate-200 p-3 text-sm">
+              <p className="font-black">{warranty.productName} · {warranty.serialNumber}</p>
+              <p className="text-slate-500">{warranty.status} · hạn đến {warranty.endDate}</p>
+              <p className="text-slate-600">{warranty.note}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-md border border-slate-200 bg-white p-5">
+        <h2 className="font-black uppercase text-slate-950">Thông báo tiến độ</h2>
+        <div className="mt-4 space-y-2">
+          {notifications.map((notification) => (
+            <div key={notification.id} className="rounded border border-slate-200 p-3">
+              <p className="font-bold">{notification.title}</p>
+              <p className="text-sm text-slate-600">{notification.message}</p>
+            </div>
+          ))}
+          {notifications.length === 0 && <p className="text-sm text-slate-500">Chưa có thông báo.</p>}
         </div>
       </div>
 

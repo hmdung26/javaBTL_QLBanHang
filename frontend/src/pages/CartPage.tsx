@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { useCart } from '../contexts/CartContext';
@@ -24,6 +25,9 @@ function CartPage() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [saveAddress, setSaveAddress] = useState(false);
+  const [promotionCode, setPromotionCode] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'BANK_TRANSFER' | 'E_WALLET'>('COD');
+  const [transactionCode, setTransactionCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -48,6 +52,11 @@ function CartPage() {
       return;
     }
 
+    if (!auth) {
+      toast.info('Vui lòng đăng nhập trước khi đặt hàng');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -55,6 +64,9 @@ function CartPage() {
         customerName,
         customerPhone,
         customerAddress,
+        promotionCode,
+        paymentMethod,
+        transactionCode,
         items: cartItems.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -84,6 +96,12 @@ function CartPage() {
         <h1 className="text-2xl font-black uppercase text-slate-950">Giỏ hàng</h1>
         <p className="text-slate-600">Kiểm tra sản phẩm và nhập thông tin đặt hàng.</p>
       </div>
+
+      {!auth && (
+        <div className="rounded-md border border-yellow-300 bg-yellow-50 p-4 text-sm text-yellow-900">
+          Bạn cần <Link to="/login" className="font-black underline">đăng nhập</Link> trước khi đặt hàng.
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <div className="space-y-4">
@@ -169,6 +187,28 @@ function CartPage() {
 
           <CheckoutInput label="Họ tên" value={customerName} onChange={setCustomerName} />
           <CheckoutInput label="Số điện thoại" value={customerPhone} onChange={setCustomerPhone} type="tel" />
+          <CheckoutInput label="Mã khuyến mãi" value={promotionCode} onChange={setPromotionCode} />
+
+          <label className="block text-sm font-medium text-slate-700">
+            Phương thức thanh toán
+            <select
+              value={paymentMethod}
+              onChange={(event) => setPaymentMethod(event.target.value as typeof paymentMethod)}
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"
+            >
+              <option value="COD">Thanh toán khi nhận hàng</option>
+              <option value="BANK_TRANSFER">Chuyển khoản ngân hàng</option>
+              <option value="E_WALLET">Ví điện tử</option>
+            </select>
+          </label>
+
+          {paymentMethod !== 'COD' && (
+            <CheckoutInput
+              label="Mã giao dịch"
+              value={transactionCode}
+              onChange={setTransactionCode}
+            />
+          )}
 
           <label htmlFor="customerAddress" className="block text-sm font-medium text-slate-700">
             Địa chỉ
@@ -196,7 +236,7 @@ function CartPage() {
 
           <button
             type="submit"
-            disabled={isSubmitting || cartItems.length === 0}
+            disabled={isSubmitting || cartItems.length === 0 || !auth}
             className="inline-flex w-full items-center justify-center rounded bg-[#d71920] px-4 py-2.5 text-sm font-black uppercase text-white hover:bg-[#b91319] disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             {isSubmitting ? 'Đang đặt hàng...' : 'Đặt hàng'}

@@ -1,12 +1,13 @@
 package com.sales.management.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -36,11 +37,19 @@ public class Category {
 
     private String description;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "parent")
+    private List<Category> children = new ArrayList<>();
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder.Default
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "category")
     private List<Product> products = new ArrayList<>();
 
     @PrePersist

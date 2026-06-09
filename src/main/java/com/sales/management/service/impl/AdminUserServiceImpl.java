@@ -3,17 +3,22 @@ package com.sales.management.service.impl;
 import com.sales.management.dto.response.AdminUserResponseDTO;
 import com.sales.management.dto.response.AdminUserReviewResponseDTO;
 import com.sales.management.dto.response.OrderResponseDTO;
+import com.sales.management.dto.request.AdminUserRequestDTO;
+import com.sales.management.dto.request.AdminUserUpdateRequestDTO;
 import com.sales.management.entity.Product;
 import com.sales.management.entity.ProductReview;
 import com.sales.management.entity.User;
 import com.sales.management.repository.ProductReviewRepository;
 import com.sales.management.repository.UserRepository;
+import com.sales.management.exception.BadRequestException;
+import com.sales.management.exception.ResourceNotFoundException;
 import com.sales.management.service.AdminUserService;
 import com.sales.management.service.OrderService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final UserRepository userRepository;
     private final ProductReviewRepository productReviewRepository;
     private final OrderService orderService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -30,6 +36,49 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .stream()
                 .map(this::toResponseDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public AdminUserResponseDTO createUser(AdminUserRequestDTO request) {
+        if (userRepository.existsByUsername(request.username())) {
+            throw new BadRequestException("Username already exists");
+        }
+        User user = User.builder()
+                .username(request.username())
+                .password(passwordEncoder.encode(request.password()))
+                .fullName(request.fullName())
+                .phone(request.phone())
+                .address(request.address())
+                .role(request.role())
+                .build();
+        return toResponseDTO(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public AdminUserResponseDTO updateUser(Long id, AdminUserUpdateRequestDTO request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        if (request.password() != null && !request.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.password()));
+        }
+        user.setFullName(request.fullName());
+        user.setPhone(request.phone());
+        user.setAddress(request.address());
+        user.setRole(request.role());
+        return toResponseDTO(userRepository.save(user));
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        if (!orderService.getMyOrders(user.getUsername()).isEmpty()) {
+            throw new BadRequestException("Cannot delete user with order history");
+        }
+        userRepository.delete(user);
     }
 
     private AdminUserResponseDTO toResponseDTO(User user) {

@@ -1,6 +1,8 @@
 package com.sales.management.dto.response;
 
 import com.sales.management.entity.OrderStatus;
+import com.sales.management.entity.PaymentMethod;
+import com.sales.management.entity.PaymentStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +28,20 @@ public class OrderResponseDTO {
     private String customerAddress;
 
     private BigDecimal totalAmount;
+
+    private BigDecimal subTotal;
+
+    private BigDecimal discountAmount;
+
+    private String promotionCode;
+
+    private PaymentMethod paymentMethod;
+
+    private PaymentStatus paymentStatus;
+
+    private String transactionCode;
+
+    private String invoiceNumber;
 
     private OrderStatus status;
 

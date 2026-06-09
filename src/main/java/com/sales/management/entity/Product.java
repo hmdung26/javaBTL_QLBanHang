@@ -53,6 +53,10 @@ public class Product {
 
     private String warrantyPeriod;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -63,6 +67,10 @@ public class Product {
     @Builder.Default
     @OneToMany(mappedBy = "product", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "product", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private List<WarehouseItem> warehouseItems = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

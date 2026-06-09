@@ -1,4 +1,4 @@
-export type UserRole = 'ROLE_USER' | 'ROLE_ADMIN';
+export type UserRole = 'ROLE_USER' | 'ROLE_ADMIN' | 'ROLE_STAFF';
 
 export interface AuthResponse {
   token: string;
@@ -21,6 +21,8 @@ export interface Product {
   createdAt: string;
   categoryId: number | null;
   categoryName: string | null;
+  brandId: number | null;
+  brandName: string | null;
   averageRating: number;
   reviewCount: number;
   purchaseCount: number;
@@ -36,6 +38,7 @@ export interface ProductRequest {
   imageUrls: string[];
   warrantyPeriod: string;
   categoryId: number | null;
+  brandId: number | null;
 }
 
 export interface Category {
@@ -43,11 +46,14 @@ export interface Category {
   name: string;
   description: string | null;
   createdAt: string;
+  parentId: number | null;
+  parentName: string | null;
 }
 
 export interface CategoryRequest {
   name: string;
   description: string;
+  parentId: number | null;
 }
 
 export interface CartItem {
@@ -64,6 +70,9 @@ export interface OrderRequest {
   customerName: string;
   customerPhone: string;
   customerAddress: string;
+  promotionCode: string;
+  paymentMethod: PaymentMethod;
+  transactionCode: string;
   items: OrderItemRequest[];
 }
 
@@ -82,12 +91,21 @@ export interface OrderResponse {
   customerPhone: string;
   customerAddress: string;
   totalAmount: number;
+  subTotal: number;
+  discountAmount: number;
+  promotionCode: string | null;
+  paymentMethod: PaymentMethod | null;
+  paymentStatus: PaymentStatus | null;
+  transactionCode: string | null;
+  invoiceNumber: string | null;
   status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   createdAt: string;
   items: OrderItemResponse[];
 }
 
 export type OrderStatus = OrderResponse['status'];
+export type PaymentMethod = 'COD' | 'BANK_TRANSFER' | 'E_WALLET';
+export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
 
 export interface LoginRequest {
   username: string;
@@ -187,4 +205,111 @@ export interface MonthlyRevenue {
   month: number;
   revenue: number;
   orderCount: number;
+}
+
+export interface Brand {
+  id: number;
+  name: string;
+  logoUrl: string | null;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface BrandRequest {
+  name: string;
+  logoUrl: string;
+  description: string;
+}
+
+export type DiscountType = 'PERCENT' | 'FIXED';
+
+export interface Promotion {
+  id: number;
+  code: string;
+  name: string | null;
+  discountType: DiscountType;
+  discountValue: number;
+  minOrderValue: number;
+  startAt: string;
+  endAt: string;
+  usageLimit: number;
+  usedCount: number;
+  active: boolean;
+}
+
+export type PromotionRequest = Omit<Promotion, 'id' | 'usedCount'>;
+
+export type WarehouseStatus = 'AVAILABLE' | 'RESERVED' | 'SOLD' | 'DAMAGED' | 'WARRANTY';
+
+export interface WarehouseItem {
+  id: number;
+  productId: number;
+  productName: string;
+  barcode: string;
+  serialNumber: string;
+  shelfLocation: string;
+  status: WarehouseStatus;
+  reservedOrderId: number | null;
+  lastUpdated: string;
+}
+
+export interface WarehouseItemRequest {
+  productId: number;
+  barcode: string;
+  serialNumber: string;
+  shelfLocation: string;
+  status: WarehouseStatus;
+}
+
+export type WarrantyStatus =
+  | 'ACTIVE'
+  | 'REQUESTED'
+  | 'INSPECTING'
+  | 'REPAIRING'
+  | 'REPLACED'
+  | 'COMPLETED'
+  | 'REJECTED'
+  | 'EXPIRED';
+
+export interface WarrantyHistory {
+  status: WarrantyStatus;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface Warranty {
+  id: number;
+  serialNumber: string;
+  productName: string | null;
+  username: string | null;
+  startDate: string;
+  endDate: string;
+  status: WarrantyStatus;
+  note: string | null;
+  history: WarrantyHistory[];
+}
+
+export interface Notification {
+  id: number;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface AdminUserRequest {
+  username: string;
+  password: string;
+  fullName: string;
+  phone: string;
+  address: string;
+  role: UserRole;
+}
+
+export interface AdminUserUpdateRequest {
+  password: string;
+  fullName: string;
+  phone: string;
+  address: string;
+  role: UserRole;
 }

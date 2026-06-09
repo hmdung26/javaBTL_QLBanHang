@@ -35,9 +35,10 @@ public class ProductController {
     public List<ProductResponseDTO> getAllProducts(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Boolean inStock
     ) {
-        return productService.getAllProducts(keyword, categoryId, inStock);
+        return productService.getAllProducts(keyword, categoryId, brandId, inStock);
     }
 
     @GetMapping("/top-rated")

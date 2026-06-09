@@ -4,6 +4,7 @@ import type { Product, ProductRequest } from '../types';
 interface ProductQuery {
   keyword?: string;
   categoryId?: number;
+  brandId?: number;
   inStock?: boolean;
 }
 

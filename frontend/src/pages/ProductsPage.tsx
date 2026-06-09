@@ -7,18 +7,21 @@ import ProductCard from '../components/ProductCard';
 import { fetchBanners } from '../services/BannerService';
 import { fetchCategories } from '../services/CategoryService';
 import { fetchProducts } from '../services/ProductService';
-import type { Banner, Category, Product } from '../types';
+import { fetchBrands } from '../services/BusinessService';
+import type { Banner, Brand, Category, Product } from '../types';
 
 function ProductsPage() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const keyword = searchParams.get('keyword') || undefined;
   const categoryId = searchParams.get('categoryId') ? Number(searchParams.get('categoryId')) : undefined;
+  const brandId = searchParams.get('brandId') ? Number(searchParams.get('brandId')) : undefined;
 
   useEffect(() => {
     let isMounted = true;
@@ -26,15 +29,17 @@ function ProductsPage() {
     async function loadProducts() {
       setIsLoading(true);
       try {
-        const [productsData, categoriesData, bannersData] = await Promise.all([
-          fetchProducts({ keyword, categoryId }),
+        const [productsData, categoriesData, brandsData, bannersData] = await Promise.all([
+          fetchProducts({ keyword, categoryId, brandId }),
           fetchCategories(),
+          fetchBrands(),
           fetchBanners(true),
         ]);
 
         if (isMounted) {
           setProducts(productsData);
           setCategories(categoriesData);
+          setBrands(brandsData);
           setBanners(bannersData);
           setErrorMessage(null);
         }
@@ -56,11 +61,11 @@ function ProductsPage() {
     return () => {
       isMounted = false;
     };
-  }, [keyword, categoryId]);
+  }, [keyword, categoryId, brandId]);
 
   return (
     <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
-      <CategorySidebar categories={categories} />
+      <CategorySidebar categories={categories} brands={brands} />
 
       <section className="space-y-5">
         <PromoHero banners={banners} />

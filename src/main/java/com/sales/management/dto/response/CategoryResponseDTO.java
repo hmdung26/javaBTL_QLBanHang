@@ -20,5 +20,9 @@ public class CategoryResponseDTO {
 
     private String description;
 
+    private Long parentId;
+
+    private String parentName;
+
     private LocalDateTime createdAt;
 }

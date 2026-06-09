@@ -2,9 +2,11 @@ import {
   createContext,
   type ReactNode,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 import type { CartItem, Product } from '../types';
+import { getAuth } from '../services/AuthService';
 
 interface CartContextValue {
   cartItems: CartItem[];
@@ -23,7 +25,15 @@ interface CartProviderProps {
 }
 
 export function CartProvider({ children }: CartProviderProps) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const storageKey = `sales-cart:${getAuth()?.username ?? 'guest'}`;
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const savedCart = localStorage.getItem(storageKey);
+    return savedCart ? (JSON.parse(savedCart) as CartItem[]) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(cartItems));
+  }, [cartItems, storageKey]);
 
   function addToCart(product: Product) {
     setCartItems((currentItems) => {
@@ -32,7 +42,7 @@ export function CartProvider({ children }: CartProviderProps) {
       if (existingItem) {
         return currentItems.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: Math.min(item.quantity + 1, product.stockQuantity) }
             : item,
         );
       }
@@ -55,7 +65,9 @@ export function CartProvider({ children }: CartProviderProps) {
 
     setCartItems((currentItems) =>
       currentItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item,
+        item.product.id === productId
+          ? { ...item, quantity: Math.min(quantity, item.product.stockQuantity) }
+          : item,
       ),
     );
   }

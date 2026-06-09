@@ -21,4 +21,6 @@ public class CategoryRequestDTO {
 
     @Size(max = 1000, message = "Category description must not exceed 1000 characters")
     private String description;
+
+    private Long parentId;
 }

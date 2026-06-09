@@ -49,7 +49,7 @@ function BaseLayout() {
     { to: '/products', label: 'Sản phẩm', icon: Package },
     { to: '/cart', label: 'Giỏ hàng', icon: ShoppingCart },
     ...(auth ? [{ to: '/account', label: 'Tài khoản', icon: UserRound }] : []),
-    ...(auth?.role === 'ROLE_ADMIN' ? [{ to: '/admin/dashboard', label: 'Quản trị', icon: ShieldCheck }] : []),
+    ...(['ROLE_ADMIN', 'ROLE_STAFF'].includes(auth?.role ?? '') ? [{ to: '/admin/dashboard', label: 'Quản trị', icon: ShieldCheck }] : []),
     ...(!auth
       ? [
           { to: '/login', label: 'Đăng nhập', icon: LogIn },

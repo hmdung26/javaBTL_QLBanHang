@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
+import com.sales.management.entity.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,6 +31,13 @@ public class OrderRequestDTO {
     @NotBlank(message = "Customer address is required")
     @Size(max = 1000, message = "Customer address must not exceed 1000 characters")
     private String customerAddress;
+
+    private String promotionCode;
+
+    private PaymentMethod paymentMethod;
+
+    @Size(max = 255, message = "Transaction code must not exceed 255 characters")
+    private String transactionCode;
 
     @Valid
     @NotEmpty(message = "Order must contain at least one item")

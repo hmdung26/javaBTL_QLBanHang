@@ -1,19 +1,31 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Boxes, FolderTree, LayoutDashboard, LogOut, ReceiptText, Store, Image, UserRound } from 'lucide-react';
+import { Boxes, FolderTree, LayoutDashboard, LogOut, ReceiptText, Store, Image, UserRound, Tags, Warehouse, ShieldCheck, BadgePercent } from 'lucide-react';
 import { getAuth, logout } from '../services/AuthService';
 
 const adminLinks = [
   { to: '/admin/dashboard', label: 'Tổng quan', icon: LayoutDashboard },
   { to: '/admin/dashboard?tab=products', label: 'Sản phẩm', icon: Boxes },
   { to: '/admin/dashboard?tab=categories', label: 'Danh mục', icon: FolderTree },
+  { to: '/admin/dashboard?tab=brands', label: 'Thương hiệu', icon: Tags },
+  { to: '/admin/dashboard?tab=promotions', label: 'Khuyến mãi', icon: BadgePercent },
+  { to: '/admin/dashboard?tab=warehouse', label: 'Kho', icon: Warehouse },
+  { to: '/admin/dashboard?tab=warranties', label: 'Bảo hành', icon: ShieldCheck },
   { to: '/admin/dashboard?tab=banners', label: 'Banner', icon: Image },
   { to: '/admin/dashboard?tab=orders', label: 'Đơn hàng', icon: ReceiptText },
   { to: '/admin/dashboard?tab=users', label: 'Người dùng', icon: UserRound },
+  { to: '/admin/dashboard?tab=access', label: 'Phân quyền', icon: ShieldCheck },
 ];
 
 function AdminLayout() {
   const auth = getAuth();
   const location = useLocation();
+  const visibleLinks = auth?.role === 'ROLE_STAFF'
+    ? adminLinks.filter((link) =>
+        link.to === '/admin/dashboard'
+        || link.to.includes('tab=orders')
+        || link.to.includes('tab=warehouse')
+        || link.to.includes('tab=warranties'))
+    : adminLinks;
 
   function handleLogout() {
     logout();
@@ -43,7 +55,7 @@ function AdminLayout() {
         </div>
         <nav className="border-t border-white/10">
           <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-4 sm:px-6 lg:px-8">
-            {adminLinks.map(({ to, label, icon: Icon }) => {
+            {visibleLinks.map(({ to, label, icon: Icon }) => {
               const isActive = `${location.pathname}${location.search}` === to
                 || (to === '/admin/dashboard' && location.pathname === '/admin/dashboard' && !location.search);
 

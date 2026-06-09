@@ -22,6 +22,11 @@ export async function updateCurrentUser(profile: UserProfileUpdateRequest): Prom
 }
 
 export function saveAuth(auth: AuthResponse) {
+  const guestCart = localStorage.getItem('sales-cart:guest');
+  const userCartKey = `sales-cart:${auth.username}`;
+  if (guestCart && !localStorage.getItem(userCartKey)) {
+    localStorage.setItem(userCartKey, guestCart);
+  }
   localStorage.setItem('authToken', auth.token);
   localStorage.setItem('authUser', JSON.stringify(auth));
 }
@@ -33,6 +38,10 @@ export function getAuth(): AuthResponse | null {
 
 export function isAdmin() {
   return getAuth()?.role === 'ROLE_ADMIN';
+}
+
+export function isStaff() {
+  return getAuth()?.role === 'ROLE_STAFF';
 }
 
 export function logout() {

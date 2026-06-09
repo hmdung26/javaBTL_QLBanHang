@@ -3,19 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import {
   BarChart3,
-  Boxes,
   BrainCircuit,
-  FolderTree,
-  Image,
-  LayoutDashboard,
   PackagePlus,
-  ReceiptText,
   Save,
   Trash2,
-  UserRound,
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import MonthlyRevenueChart from '../components/MonthlyRevenueChart';
+import AdminFeaturePanel, { type FeatureMode } from '../components/AdminFeaturePanel';
 import RichTextEditor from '../components/RichTextEditor';
 import { fetchAdminUsers, fetchDashboardStats, fetchMonthlyRevenue } from '../services/AdminService';
 import { generateAdminReport } from '../services/AiService';
@@ -39,9 +34,11 @@ import {
 } from '../services/ProductService';
 import { fetchOrders, updateOrderStatus } from '../services/OrderService';
 import { uploadImage } from '../services/UploadService';
+import { fetchBrands, updatePayment } from '../services/BusinessService';
 import type {
   AdminUser,
   Banner,
+  Brand,
   BannerRequest,
   Category,
   CategoryRequest,
@@ -53,7 +50,14 @@ import type {
   ProductRequest,
 } from '../types';
 
-type AdminTab = 'overview' | 'products' | 'categories' | 'banners' | 'orders' | 'users';
+type AdminTab =
+  | 'overview'
+  | 'products'
+  | 'categories'
+  | 'banners'
+  | 'orders'
+  | 'users'
+  | FeatureMode;
 
 const emptyProductForm: ProductRequest = {
   name: '',
@@ -65,11 +69,13 @@ const emptyProductForm: ProductRequest = {
   imageUrls: [],
   warrantyPeriod: '',
   categoryId: null,
+  brandId: null,
 };
 
 const emptyCategoryForm: CategoryRequest = {
   name: '',
   description: '',
+  parentId: null,
 };
 
 const emptyBannerForm: BannerRequest = {
@@ -135,6 +141,7 @@ function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -188,10 +195,11 @@ function AdminDashboardPage() {
     setIsLoading(true);
 
     try {
-      const [statsData, productsData, categoriesData, bannersData, ordersData, usersData, monthlyRevenueData] = await Promise.all([
+      const [statsData, productsData, categoriesData, brandsData, bannersData, ordersData, usersData, monthlyRevenueData] = await Promise.all([
         fetchDashboardStats(),
         fetchProducts(),
         fetchCategories(),
+        fetchBrands(),
         fetchBanners(false),
         fetchOrders(),
         fetchAdminUsers(),
@@ -201,6 +209,7 @@ function AdminDashboardPage() {
       setStats(statsData);
       setProducts(productsData);
       setCategories(categoriesData);
+      setBrands(brandsData);
       setBanners(bannersData);
       setOrders(ordersData);
       setUsers(usersData);
@@ -252,6 +261,7 @@ function AdminDashboardPage() {
       imageUrls: product.imageUrls?.length ? product.imageUrls : product.imageUrl ? [product.imageUrl] : [],
       warrantyPeriod: product.warrantyPeriod ?? '',
       categoryId: product.categoryId,
+      brandId: product.brandId,
     });
     setActiveTab('products');
   }
@@ -295,6 +305,7 @@ function AdminDashboardPage() {
     setCategoryForm({
       name: category.name,
       description: category.description ?? '',
+      parentId: category.parentId,
     });
     setActiveTab('categories');
   }
@@ -370,6 +381,16 @@ function AdminDashboardPage() {
     }
   }
 
+  async function handlePaymentStatusChange(id: number, status: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED') {
+    try {
+      await updatePayment(id, status, '');
+      toast.success('Đã cập nhật thanh toán');
+      await loadDashboard();
+    } catch {
+      toast.error('Không cập nhật được thanh toán');
+    }
+  }
+
   async function handleGenerateAiReport() {
     setIsGeneratingReport(true);
 
@@ -403,32 +424,6 @@ function AdminDashboardPage() {
           </button>
         </div>
       </div>
-
-      {false && <div className="flex gap-2 overflow-x-auto">
-        {[
-          { id: 'overview', label: 'Tổng quan', icon: LayoutDashboard },
-          { id: 'products', label: 'Sản phẩm', icon: Boxes },
-          { id: 'categories', label: 'Danh mục', icon: FolderTree },
-          { id: 'banners', label: 'Banner', icon: Image },
-          { id: 'users', label: 'Người dùng', icon: UserRound },
-          { id: 'orders', label: 'Đơn hàng', icon: ReceiptText },
-        ].map(({ id, label, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => changeTab(id as AdminTab)}
-            className={[
-              'inline-flex shrink-0 items-center gap-2 rounded px-4 py-2 text-sm font-black uppercase',
-              activeTab === id
-                ? 'bg-[#d71920] text-white'
-                : 'bg-white text-slate-700 hover:bg-red-50 hover:text-[#d71920]',
-            ].join(' ')}
-          >
-            <Icon className="h-4 w-4" />
-            {label}
-          </button>
-        ))}
-      </div>}
 
       {isLoading && (
         <div className="rounded-md border border-slate-200 bg-white p-8 text-center text-slate-600">
@@ -513,6 +508,7 @@ function AdminDashboardPage() {
         <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
           <ProductForm
             categories={categories}
+            brands={brands}
             editingProductId={editingProductId}
             productForm={productForm}
             setEditingProductId={setEditingProductId}
@@ -571,6 +567,7 @@ function AdminDashboardPage() {
       {!isLoading && activeTab === 'categories' && (
         <div className="grid gap-5 lg:grid-cols-[360px_1fr]">
           <CategoryForm
+            categories={categories}
             categoryForm={categoryForm}
             editingCategoryId={editingCategoryId}
             setCategoryForm={setCategoryForm}
@@ -585,6 +582,7 @@ function AdminDashboardPage() {
                   <div>
                     <p className="font-bold text-slate-950">{category.name}</p>
                     <p className="text-sm text-slate-500">{category.description || 'Chưa có mô tả'}</p>
+                    {category.parentName && <p className="text-xs text-slate-400">Thuộc: {category.parentName}</p>}
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -688,7 +686,7 @@ function AdminDashboardPage() {
           </div>
           <div className="divide-y divide-slate-100">
             {visibleOrders.map((order) => (
-              <div key={order.id} className="grid gap-4 p-4 xl:grid-cols-[1fr_180px_180px]">
+              <div key={order.id} className="grid gap-4 p-4 xl:grid-cols-[1fr_160px_180px_180px]">
                 <div>
                   <p className="font-black text-slate-950">Đơn #{order.id}</p>
                   <p className="text-xs font-semibold text-slate-500">
@@ -701,6 +699,22 @@ function AdminDashboardPage() {
                   <p className="mt-2 text-sm text-slate-500">
                     {order.items.map((item) => `${item.productName} x${item.quantity}`).join(', ')}
                   </p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-slate-500">Thanh toán</label>
+                  <select
+                    value={order.paymentStatus ?? 'PENDING'}
+                    onChange={(event) => handlePaymentStatusChange(
+                      order.id,
+                      event.target.value as 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED',
+                    )}
+                    className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm font-bold"
+                  >
+                    {['PENDING', 'PAID', 'FAILED', 'REFUNDED'].map((status) => <option key={status}>{status}</option>)}
+                  </select>
+                  <button type="button" onClick={() => window.print()} className="mt-2 text-xs font-black underline">
+                    In phiếu giao hàng
+                  </button>
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase text-slate-500">Tổng tiền</p>
@@ -807,6 +821,10 @@ function AdminDashboardPage() {
             )}
           </div>
         </div>
+      )}
+
+      {!isLoading && ['brands', 'promotions', 'warehouse', 'warranties', 'access'].includes(activeTab) && (
+        <AdminFeaturePanel mode={activeTab as FeatureMode} />
       )}
     </section>
   );
@@ -985,6 +1003,7 @@ function TableHeader({ title }: { title: string }) {
 
 interface ProductFormProps {
   categories: Category[];
+  brands: Brand[];
   productForm: ProductRequest;
   editingProductId: number | null;
   setProductForm: (product: ProductRequest) => void;
@@ -994,6 +1013,7 @@ interface ProductFormProps {
 
 function ProductForm({
   categories,
+  brands,
   productForm,
   editingProductId,
   setProductForm,
@@ -1077,6 +1097,25 @@ function ProductForm({
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
         />
         {isUploading && <span className="mt-1 block text-xs text-slate-500">Đang tải ảnh...</span>}
+      </label>
+
+      <label className="block text-sm font-bold text-slate-700">
+        Thương hiệu
+        <select
+          value={productForm.brandId ?? ''}
+          onChange={(event) =>
+            setProductForm({
+              ...productForm,
+              brandId: event.target.value ? Number(event.target.value) : null,
+            })
+          }
+          className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+        >
+          <option value="">Chưa chọn thương hiệu</option>
+          {brands.map((brand) => (
+            <option key={brand.id} value={brand.id}>{brand.name}</option>
+          ))}
+        </select>
       </label>
       {productForm.imageUrls.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-3">
@@ -1169,6 +1208,7 @@ function ProductForm({
 }
 
 interface CategoryFormProps {
+  categories: Category[];
   categoryForm: CategoryRequest;
   editingCategoryId: number | null;
   setCategoryForm: (category: CategoryRequest) => void;
@@ -1177,6 +1217,7 @@ interface CategoryFormProps {
 }
 
 function CategoryForm({
+  categories,
   categoryForm,
   editingCategoryId,
   setCategoryForm,
@@ -1194,6 +1235,22 @@ function CategoryForm({
         required
         onChange={(value) => setCategoryForm({ ...categoryForm, name: value })}
       />
+      <label className="block text-sm font-bold text-slate-700">
+        Danh mục cha
+        <select
+          value={categoryForm.parentId ?? ''}
+          onChange={(event) => setCategoryForm({
+            ...categoryForm,
+            parentId: event.target.value ? Number(event.target.value) : null,
+          })}
+          className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+        >
+          <option value="">Danh mục gốc</option>
+          {categories
+            .filter((category) => category.id !== editingCategoryId)
+            .map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+        </select>
+      </label>
       <AdminInput
         label="Mô tả"
         value={categoryForm.description}
